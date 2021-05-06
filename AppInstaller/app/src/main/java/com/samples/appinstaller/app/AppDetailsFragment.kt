@@ -5,38 +5,38 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.samples.appinstaller.databinding.FragmentAppDetailsBinding
 
-class AppFragment : Fragment() {
-
-    private lateinit var appViewModel: AppViewModel
+class AppDetailsFragment : Fragment() {
+    private val viewModel: AppDetailsViewModel by viewModels()
     private var _binding: FragmentAppDetailsBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
-        appViewModel =
-                ViewModelProvider(this).get(AppViewModel::class.java)
-
         _binding = FragmentAppDetailsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-//        val textView: TextView = binding.textDashboard
-//        appViewModel.text.observe(viewLifecycleOwner, Observer {
-//            textView.text = it
-//        })
-        return root
+        initFragment()
+
+        return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun initFragment() {
+        binding.appName.text = viewModel.selectedApp.name
+        binding.company.text = viewModel.selectedApp.company
+        binding.cancelButton.visibility = View.GONE
+        binding.openButton.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
     }
 }

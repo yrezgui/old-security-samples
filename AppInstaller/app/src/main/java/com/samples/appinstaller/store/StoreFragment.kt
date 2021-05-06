@@ -8,12 +8,12 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.samples.appinstaller.databinding.FragmentHomeBinding
+import com.samples.appinstaller.databinding.FragmentStoreBinding
 
 class StoreFragment : Fragment() {
 
     private lateinit var viewModel: StoreViewModel
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentStoreBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -26,7 +26,7 @@ class StoreFragment : Fragment() {
     ): View {
         viewModel = ViewModelProvider(this).get(StoreViewModel::class.java)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentStoreBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textHome

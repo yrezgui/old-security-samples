@@ -2,13 +2,12 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ScrollingFragment">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
+        android:layout_margin="16dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -25,23 +24,23 @@
                 android:layout_height="96dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginLeft="8dp"
-                android:src="@mipmap/ic_app" />
+                android:src="@mipmap/ic_launcher" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/text_margin"
+                android:layout_margin="16dp"
                 android:orientation="vertical">
                 <TextView
-                    android:id="@+id/content"
-                    android:text="App name"
+                    android:id="@+id/app_name"
+                    tools:text="App name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceListItem"
                     android:textStyle="bold"/>
                 <TextView
-                    android:id="@+id/subtitle"
-                    android:text="App subtitle"
+                    android:id="@+id/company"
+                    tools:text="Company"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceListItemSecondary" />
@@ -54,11 +53,10 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/install"
+                android:id="@+id/install_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Install"
-                style="@style/PrimaryButton" />
+                android:text="Install" />
 
         </LinearLayout>
 
@@ -68,13 +66,11 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/secondary"
+                android:id="@+id/cancel_button"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Cancel"
-                style="@style/SecondaryButton"
-                />
+                android:text="Cancel" />
 
             <Space
                 android:layout_weight="0"
@@ -82,24 +78,23 @@
                 android:layout_width="20dp"/>
 
             <Button
-                android:id="@+id/primary"
+                android:id="@+id/open_button"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Open"
-                style="@style/PrimaryButton" />
+                android:text="Open" />
 
         </LinearLayout>
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:min="0"
             android:max="100" />
         <TextView
-            android:id="@+id/progressStatus"
+            android:id="@+id/progress_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="?attr/colorSecondary" />

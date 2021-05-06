@@ -3,17 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_app_details">
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_store"
         android:name="com.samples.appinstaller.store.StoreFragment"
         android:label="@string/title_store"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_store" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.samples.appinstaller.app.AppFragment"
-        android:label="@string/title_apps"
+        android:id="@+id/navigation_library"
+        android:name="com.samples.appinstaller.app.AppDetailsFragment"
+        android:label="@string/title_library"
         tools:layout="@layout/fragment_library" />
+
+    <fragment
+        android:id="@+id/navigation_app_details"
+        android:name="com.samples.appinstaller.app.AppDetailsFragment"
+        android:label="@string/title_app_details"
+        tools:layout="@layout/fragment_app_details" />
 </navigation>
