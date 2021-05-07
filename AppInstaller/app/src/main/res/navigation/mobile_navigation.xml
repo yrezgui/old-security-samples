@@ -9,17 +9,33 @@
         android:id="@+id/navigation_store"
         android:name="com.samples.appinstaller.store.StoreFragment"
         android:label="@string/title_store"
-        tools:layout="@layout/fragment_store" />
+        tools:layout="@layout/fragment_store" >
+        <action
+            android:id="@+id/action_navigation_store_to_navigation_app_details"
+            app:destination="@id/navigation_app_details">
+            <argument
+                android:name="packageId"
+                app:argType="string" />
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_library"
         android:name="com.samples.appinstaller.app.AppDetailsFragment"
         android:label="@string/title_library"
-        tools:layout="@layout/fragment_library" />
+        tools:layout="@layout/fragment_library" >
+        <action
+            android:id="@+id/action_navigation_library_to_navigation_app_details"
+            app:destination="@id/navigation_app_details" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_app_details"
         android:name="com.samples.appinstaller.app.AppDetailsFragment"
         android:label="@string/title_app_details"
-        tools:layout="@layout/fragment_app_details" />
+        tools:layout="@layout/fragment_app_details">
+        <argument
+            android:name="packageId"
+            app:argType="string" />
+    </fragment>
 </navigation>
