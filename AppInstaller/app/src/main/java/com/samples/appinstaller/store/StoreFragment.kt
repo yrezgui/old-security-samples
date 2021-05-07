@@ -9,13 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.samples.appinstaller.app.AppDetailsViewModel
+import com.samples.appinstaller.data.SampleStore
 import com.samples.appinstaller.databinding.FragmentStoreBinding
 
 class StoreFragment : Fragment() {
-    private val viewModel: StoreViewModel by viewModels()
     private var _binding: FragmentStoreBinding? = null
-
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -24,13 +24,11 @@ class StoreFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View {
         _binding = FragmentStoreBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        viewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = StoreRecyclerViewAdapter(SampleStore)
+
+        return binding.root
     }
 
     override fun onDestroyView() {
