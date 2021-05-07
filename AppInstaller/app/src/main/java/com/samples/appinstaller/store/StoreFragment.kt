@@ -6,17 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.samples.appinstaller.app.AppDetailsViewModel
 import com.samples.appinstaller.databinding.FragmentStoreBinding
 
 class StoreFragment : Fragment() {
-
-    private lateinit var viewModel: StoreViewModel
+    private val viewModel: StoreViewModel by viewModels()
     private var _binding: FragmentStoreBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -24,8 +23,6 @@ class StoreFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        viewModel = ViewModelProvider(this).get(StoreViewModel::class.java)
-
         _binding = FragmentStoreBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

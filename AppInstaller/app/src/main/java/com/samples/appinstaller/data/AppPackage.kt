@@ -1,3 +1,10 @@
 package com.samples.appinstaller.data
 
-data class AppPackage(val id: String, val name: String, val company: String)
+import androidx.annotation.DrawableRes
+
+data class AppPackage(
+    val id: String,
+    val name: String,
+    val company: String,
+    @DrawableRes val icon: Int
+)

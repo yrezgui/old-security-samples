@@ -2,7 +2,7 @@
     <string name="app_name">App Installer</string>
     <string name="title_store">Demo Store</string>
     <string name="title_library">My Apps</string>
-    <string name="title_app_details">My Apps</string>
+    <string name="title_app_details">My App Details</string>
 
     <string name="large_text">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.

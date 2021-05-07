@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.samples.appinstaller.R
 import com.samples.appinstaller.data.AppPackage
 
-class StoreRecyclerViewAdapter(items: List<AppPackage>, pm: PackageManager) :
-    RecyclerView.Adapter<StoreRecyclerViewAdapter.ViewHolder>() {
+class RecyclerViewAdapter(items: List<AppPackage>, pm: PackageManager) :
+    RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
     private val mValues: List<AppPackage> = items
     private val packageManager: PackageManager = pm
 
