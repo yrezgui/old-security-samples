@@ -4,38 +4,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import com.samples.appinstaller.app.AppDetailsViewModel
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.samples.appinstaller.data.SampleStore
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 
 class LibraryFragment : Fragment() {
+//    private lateinit var libraryViewModel: AppDetailsViewModel
 
-    private lateinit var libraryViewModel: AppDetailsViewModel
     private var _binding: FragmentLibraryBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
-        libraryViewModel =
-                ViewModelProvider(this).get(AppDetailsViewModel::class.java)
-
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        libraryViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = LibraryRecyclerViewAdapter(SampleStore)
+
+        return binding.root
     }
 
     override fun onDestroyView() {

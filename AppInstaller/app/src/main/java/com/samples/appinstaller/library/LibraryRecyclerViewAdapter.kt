@@ -1,4 +1,4 @@
-package com.samples.appinstaller.store
+package com.samples.appinstaller.library
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.samples.appinstaller.R
 import com.samples.appinstaller.data.AppPackage
 
-class StoreRecyclerViewAdapter(private val list: List<AppPackage>) :
-    RecyclerView.Adapter<StoreRecyclerViewAdapter.ViewHolder>() {
+class LibraryRecyclerViewAdapter(private val list: List<AppPackage>) :
+    RecyclerView.Adapter<LibraryRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val appNameTextView: TextView = view.findViewById(R.id.app_name)
@@ -38,7 +38,7 @@ class StoreRecyclerViewAdapter(private val list: List<AppPackage>) :
 
         viewHolder.itemView.setOnClickListener {
             it.findNavController().navigate(
-                StoreFragmentDirections.actionNavigationStoreToNavigationAppDetails(
+                LibraryFragmentDirections.actionNavigationLibraryToNavigationAppDetails(
                     appName = app.name,
                     packageId = app.id
                 )
