@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.samples.appinstaller">
 
+    <!-- We use this permission to install apps -->
+    <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- We use this permission to uninstall apps -->
+    <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!-- We use this permission to get the list of our installed apps -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- We create this permission to only let the system sends us broadcasts on our app installs -->
+    <permission
+        android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
+        android:protectionLevel="signature" />
 
     <application
         android:allowBackup="true"
