@@ -5,11 +5,13 @@
     <data>
 
         <import type="android.view.View" />
+
         <import type="com.samples.appinstaller.app.AppStatus" />
 
         <variable
             name="viewmodel"
             type="com.samples.appinstaller.app.AppDetailsViewModel" />
+
         <variable
             name="permissionHandler"
             type="com.samples.appinstaller.app.AppDetailsFragment.InstallPermissionHandler" />

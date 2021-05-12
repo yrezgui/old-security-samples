@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="auto_update_schedule">
+        <item>Don\'t auto-update apps</item>
+        <item>Check and update every minute</item>
+        <item>Check and update 5 minutes</item>
+        <item>Check and update 10 minutes</item>
+        <item>Check and update 60 minutes</item>
+    </string-array>
+</resources>

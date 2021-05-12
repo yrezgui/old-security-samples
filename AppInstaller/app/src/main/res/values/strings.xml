@@ -14,14 +14,14 @@
     <string name="autoupdate_settings_description">DemoStore will update (or not) automatically apps it has installed based on these settings</string>
     <string name="auto_update_title">Auto-update Settings</string>
 
-    <string name="auto_update_label">Auto-update Schedule</string>
+    <string name="auto_update_schedule_label">Auto-update Schedule</string>
     <string name="auto_update_disabled">Don\'t auto-update apps</string>
     <plurals name="auto_update_schedule">
         <item quantity="one">Check and update every minute</item>
         <item quantity="other">Check and update %d minutes</item>
     </plurals>
 
-    <string name="update_availability_label">Time between install and update availability</string>
+    <string name="update_availability_period_label">Time between install and update availability</string>
     <string name="update_availability_disabled">Don\'t fetch updates</string>
     <string name="trigger_updates_check_label">Trigger updates check</string>
     <string name="trigger_app_upgrades_label">Trigger app upgrades</string>
@@ -29,7 +29,6 @@
         <item quantity="one">Updates available one minute after install</item>
         <item quantity="other">Updates available %d minutes after install</item>
     </plurals>
-
 
     <string name="large_text">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.

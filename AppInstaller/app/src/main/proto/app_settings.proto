@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_package = "com.samples.appinstaller";
+option java_multiple_files = true;
+
+message AppSettings {
+
+  enum AutoUpdateSchedule {
+    MANUAL = 0;
+    EVERY_1_MINUTE = 1;
+    EVERY_5_MINUTES = 2;
+    EVERY_10_MINUTES = 3;
+    EVERY_60_MINUTES = 4;
+  }
+
+  enum UpdateAvailabilityPeriod {
+    NONE = 0;
+    AFTER_1_MINUTE = 1;
+    AFTER_5_MINUTES = 2;
+    AFTER_10_MINUTES = 3;
+    AFTER_60_MINUTES = 4;
+  }
+
+  AutoUpdateSchedule autoUpdateSchedule = 3;
+  UpdateAvailabilityPeriod updateAvailabilityPeriod = 2;
+}

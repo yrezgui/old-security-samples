@@ -1,31 +1,66 @@
 package com.samples.appinstaller.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.samples.appinstaller.BuildConfig
+import com.samples.appinstaller.R
+import com.samples.appinstaller.app.AppDetailsFragment
 import com.samples.appinstaller.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
     private val viewModel: SettingsViewModel by viewModels()
-
-    private var _binding: FragmentSettingsBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentSettingsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_settings,
+            container,
+            false
+        )
+        binding.viewmodel = viewModel
+        binding.settingsHandler = SettingsHandler()
+        binding.lifecycleOwner = this
 
         return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    class SettingsHandler {
+        fun showAutoUpdateSchedule(view: View) {
+            val context = view.context
+
+            MaterialAlertDialogBuilder(context)
+                .setTitle(context.getString(R.string.auto_update_schedule_label))
+                .setItems(context.resources.getStringArray(R.array.auto_update_schedule)) { _, which ->
+                    view.findFragment<SettingsFragment>().viewModel.setAutoUpdateSchedule(which)
+                }
+                .show()
+        }
+
+        fun showUpdateAvailabilityPeriod(view: View) {
+            val context = view.context
+
+            MaterialAlertDialogBuilder(context)
+                .setTitle(context.getString(R.string.update_availability_period_label))
+                .setItems(context.resources.getStringArray(R.array.auto_update_schedule)) { _, which ->
+                    view.findFragment<SettingsFragment>().viewModel.setUpdateAvailabilityPeriod(which)
+                }
+                .show()
+        }
     }
 }
