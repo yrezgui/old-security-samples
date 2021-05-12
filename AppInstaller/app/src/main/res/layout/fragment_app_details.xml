@@ -80,14 +80,14 @@
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Request Permission"
+                    android:text="@string/request_permission_label"
                     android:visibility="@{viewmodel.appStatus == AppStatus.UNKNOWN ? View.VISIBLE : View.GONE}"
                     android:onClick="@{permissionHandler.showRationale}"/>
 
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Install"
+                    android:text="@string/install_label"
                     android:visibility="@{viewmodel.appStatus == AppStatus.UNINSTALLED ? View.VISIBLE : View.GONE}"
                     android:onClick="@{viewmodel.installApp}"/>
 
@@ -101,7 +101,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Cancel" />
+                        android:text="@string/cancel_install_label" />
 
                     <Space
                         android:layout_width="20dp"
@@ -113,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:enabled="false"
-                        android:text="Open"
+                        android:text="@string/open_app_install"
                         android:onClick="@{viewmodel.openApp}" />
 
                 </LinearLayout>
@@ -136,7 +136,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Uninstall"
+                        android:text="@string/uninstall_label"
                         android:onClick="@{viewmodel.uninstallApp}" />
 
                     <Space
@@ -148,7 +148,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Open"
+                        android:text="@string/open_app_install"
                         android:onClick="@{viewmodel.openApp}" />
 
                 </LinearLayout>

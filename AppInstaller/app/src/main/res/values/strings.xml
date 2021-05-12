@@ -5,19 +5,11 @@
     <string name="title_app_details">My App Details</string>
     <string name="title_settings">Settings</string>
 
-    <string name="large_text">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.
-\n\nNunc maximus aliquam purus:
-\n\n&#8226; Cras accumsan orci sed dolor eleifend scelerisque.
-\n&#8226; Suspendisse ut justo nec augue ultricies bibendum.
-\n&#8226; Vestibulum ante ipsum primis in faucibus orci luctus.
-\n\nUt efficitur enim massa, at lacinia ipsum auctor eu. Curabitur in justo ac lacus dapibus dapibus. Phasellus sit amet mauris magna. In luctus pretium magna, in porta lacus. Nunc hendrerit arcu dolor, vel fringilla odio laoreet sed. Nam tincidunt felis felis. Donec sagittis ut eros non posuere. Ut condimentum vestibulum mattis. Vivamus vitae felis risus.
-\n\nPraesent tristique orci ante, sit amet egestas orci rutrum a. Fusce sit amet ipsum orci. Pellentesque sagittis, quam ut viverra finibus, ex risus malesuada mi, ac eleifend tellus enim consectetur nulla. Mauris sem arcu, blandit ut felis id, auctor convallis turpis. Nunc sagittis sem non mi aliquet dapibus. Proin feugiat nisl at tellus ullamcorper rhoncus.
-\n\nNam sit amet risus non ligula facilisis rhoncus. Integer dapibus, lectus et lobortis bibendum, sem enim dignissim ligula, sit amet dictum sapien lorem non velit. Etiam mollis nunc ac gravida efficitur. Curabitur aliquam ornare augue, quis pharetra ipsum feugiat non. Curabitur porttitor vel augue ut pretium. Sed tempus tortor eros, ut aliquet felis molestie non. Quisque ut placerat velit, eu tempor eros. Aliquam eleifend metus id erat sodales ullamcorper.
-\n\nDonec sem purus, luctus bibendum est vestibulum, accumsan dignissim sapien. Nulla ornare quam eu justo malesuada finibus. Sed sed eleifend purus, mollis egestas turpis. Duis faucibus laoreet tortor, in interdum est maximus nec. In id porttitor velit. Nunc feugiat sem ac tortor feugiat faucibus. Sed sodales elit non massa ultrices pulvinar.
-\n\nPraesent facilisis vehicula vehicula. Duis enim quam, fringilla et aliquam vel, accumsan a nunc. Mauris viverra elit ac faucibus suscipit. Nunc tincidunt urna vel congue vehicula. Donec laoreet nibh tempor diam elementum, nec imperdiet ante rhoncus. Mauris gravida mi dolor. Suspendisse potenti.
-\n\nSuspendisse at urna et nibh blandit laoreet. Nam cursus turpis at neque mattis ultrices. Integer ornare sollicitudin erat sit amet gravida. Cras placerat tempus urna, nec euismod eros laoreet a. Proin at ex mauris. Donec urna ante, efficitur et magna sollicitudin, imperdiet ultrices sapien. Etiam quis dui pulvinar, efficitur justo id, placerat leo. Pellentesque vel neque diam. Nunc elementum dui sed sem volutpat accumsan. Maecenas cursus ullamcorper dictum. Nunc ut odio in orci volutpat pretium et at nisi.
-    </string>
+    <string name="request_permission_label">Request Permission</string>
+    <string name="install_label">Install</string>
+    <string name="cancel_install_label">Cancel</string>
+    <string name="open_app_install">Open</string>
+    <string name="uninstall_label">Uninstall</string>
 
     <string name="autoupdate_settings_description">DemoStore will update (or not) automatically apps it has installed based on these settings</string>
     <string name="auto_update_title">Auto-update Settings</string>
@@ -37,4 +29,19 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies s
         <item quantity="one">Updates available one minute after install</item>
         <item quantity="other">Updates available %d minutes after install</item>
     </plurals>
+
+
+    <string name="large_text">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.
+\n\nNunc maximus aliquam purus:
+\n\n&#8226; Cras accumsan orci sed dolor eleifend scelerisque.
+\n&#8226; Suspendisse ut justo nec augue ultricies bibendum.
+\n&#8226; Vestibulum ante ipsum primis in faucibus orci luctus.
+\n\nUt efficitur enim massa, at lacinia ipsum auctor eu. Curabitur in justo ac lacus dapibus dapibus. Phasellus sit amet mauris magna. In luctus pretium magna, in porta lacus. Nunc hendrerit arcu dolor, vel fringilla odio laoreet sed. Nam tincidunt felis felis. Donec sagittis ut eros non posuere. Ut condimentum vestibulum mattis. Vivamus vitae felis risus.
+\n\nPraesent tristique orci ante, sit amet egestas orci rutrum a. Fusce sit amet ipsum orci. Pellentesque sagittis, quam ut viverra finibus, ex risus malesuada mi, ac eleifend tellus enim consectetur nulla. Mauris sem arcu, blandit ut felis id, auctor convallis turpis. Nunc sagittis sem non mi aliquet dapibus. Proin feugiat nisl at tellus ullamcorper rhoncus.
+\n\nNam sit amet risus non ligula facilisis rhoncus. Integer dapibus, lectus et lobortis bibendum, sem enim dignissim ligula, sit amet dictum sapien lorem non velit. Etiam mollis nunc ac gravida efficitur. Curabitur aliquam ornare augue, quis pharetra ipsum feugiat non. Curabitur porttitor vel augue ut pretium. Sed tempus tortor eros, ut aliquet felis molestie non. Quisque ut placerat velit, eu tempor eros. Aliquam eleifend metus id erat sodales ullamcorper.
+\n\nDonec sem purus, luctus bibendum est vestibulum, accumsan dignissim sapien. Nulla ornare quam eu justo malesuada finibus. Sed sed eleifend purus, mollis egestas turpis. Duis faucibus laoreet tortor, in interdum est maximus nec. In id porttitor velit. Nunc feugiat sem ac tortor feugiat faucibus. Sed sodales elit non massa ultrices pulvinar.
+\n\nPraesent facilisis vehicula vehicula. Duis enim quam, fringilla et aliquam vel, accumsan a nunc. Mauris viverra elit ac faucibus suscipit. Nunc tincidunt urna vel congue vehicula. Donec laoreet nibh tempor diam elementum, nec imperdiet ante rhoncus. Mauris gravida mi dolor. Suspendisse potenti.
+\n\nSuspendisse at urna et nibh blandit laoreet. Nam cursus turpis at neque mattis ultrices. Integer ornare sollicitudin erat sit amet gravida. Cras placerat tempus urna, nec euismod eros laoreet a. Proin at ex mauris. Donec urna ante, efficitur et magna sollicitudin, imperdiet ultrices sapien. Etiam quis dui pulvinar, efficitur justo id, placerat leo. Pellentesque vel neque diam. Nunc elementum dui sed sem volutpat accumsan. Maecenas cursus ullamcorper dictum. Nunc ut odio in orci volutpat pretium et at nisi.
+    </string>
 </resources>
