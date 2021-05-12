@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.samples.appinstaller">
 
+    <!-- TODO: Confirm protectionLevel to signature or signatureOrSystem -->
+    <!-- We create this permission to only let the system sends us broadcasts on our app installs -->
+    <permission
+        android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- We use this permission to install apps -->
     <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -14,10 +20,8 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
-    <!-- We create this permission to only let the system sends us broadcasts on our app installs -->
-    <permission
-        android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
-        android:protectionLevel="signature" />
+    <!-- We use this permission to receive broadcasts on our app installs -->
+    <uses-permission android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES" />
 
     <application
         android:allowBackup="true"
