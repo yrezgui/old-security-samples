@@ -15,6 +15,8 @@
     <string name="auto_update_title">Auto-update Settings</string>
 
     <string name="auto_update_schedule_label">Auto-update Schedule</string>
+    <string name="trigger_auto_updates_manually_label">Trigger auto-updating manually</string>
+
     <string name="auto_update_disabled">Don\'t auto-update apps</string>
     <plurals name="auto_update_schedule">
         <item quantity="one">Check and update every minute</item>
@@ -22,12 +24,12 @@
     </plurals>
 
     <string name="update_availability_period_label">Time between install and update availability</string>
-    <string name="update_availability_disabled">Don\'t fetch updates</string>
-    <string name="trigger_updates_check_label">Trigger updates check</string>
-    <string name="trigger_app_upgrades_label">Trigger app upgrades</string>
-    <plurals name="update_availability_schedule">
-        <item quantity="one">Updates available one minute after install</item>
-        <item quantity="other">Updates available %d minutes after install</item>
+    <string name="trigger_new_updates_label">Trigger adding updates manually</string>
+
+    <string name="update_availability_disabled">No updates</string>
+    <plurals name="update_availability_period">
+        <item quantity="one">After one minute</item>
+        <item quantity="other">After %d minutes</item>
     </plurals>
 
     <string name="large_text">

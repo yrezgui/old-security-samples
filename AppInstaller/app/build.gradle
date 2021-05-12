@@ -54,7 +54,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation 'androidx.work:work-runtime-ktx:2.7.0-alpha03'
 
-    implementation 'androidx.datastore:datastore-core:1.0.0-beta01'
+    implementation 'androidx.datastore:datastore:1.0.0-beta01'
     implementation 'com.google.protobuf:protobuf-javalite:3.10.0'
 
     testImplementation 'junit:junit:4.13.2'

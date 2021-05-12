@@ -85,11 +85,13 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/trigger_updates_check_label" />
+            android:text="@string/trigger_auto_updates_manually_label"
+            android:onClick="@{viewmodel.triggerAutoUpdating}"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/trigger_app_upgrades_label" />
+            android:text="@string/trigger_new_updates_label"
+            android:onClick="@{viewmodel.triggerAddingUpdates}" />
     </LinearLayout>
 </layout>

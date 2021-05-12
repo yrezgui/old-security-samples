@@ -57,7 +57,7 @@ class SettingsFragment : Fragment() {
 
             MaterialAlertDialogBuilder(context)
                 .setTitle(context.getString(R.string.update_availability_period_label))
-                .setItems(context.resources.getStringArray(R.array.auto_update_schedule)) { _, which ->
+                .setItems(context.resources.getStringArray(R.array.update_availability_period)) { _, which ->
                     view.findFragment<SettingsFragment>().viewModel.setUpdateAvailabilityPeriod(which)
                 }
                 .show()

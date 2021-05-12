@@ -1,6 +1,9 @@
 package com.samples.appinstaller.settings
 
+import android.content.Context
 import androidx.datastore.core.CorruptionException
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
 import com.samples.appinstaller.AppSettings
@@ -23,3 +26,8 @@ object AppSettingsSerializer : Serializer<AppSettings> {
 
     override suspend fun writeTo(t: AppSettings, output: OutputStream) = t.writeTo(output)
 }
+
+val Context.appSettings: DataStore<AppSettings> by dataStore(
+    fileName = PROTO_STORE_FILE_NAME,
+    serializer = AppSettingsSerializer
+)
