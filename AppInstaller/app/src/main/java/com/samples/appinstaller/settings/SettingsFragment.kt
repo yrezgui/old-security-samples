@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.samples.appinstaller.databinding.FragmentLibraryBinding
+import androidx.fragment.app.viewModels
+import com.samples.appinstaller.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
-//    private lateinit var libraryViewModel: AppDetailsViewModel
+    private val viewModel: SettingsViewModel by viewModels()
 
-    private var _binding: FragmentLibraryBinding? = null
+    private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -18,7 +19,7 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLibraryBinding.inflate(inflater, container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
         return binding.root
     }

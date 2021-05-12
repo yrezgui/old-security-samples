@@ -18,4 +18,21 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies s
 \n\nPraesent facilisis vehicula vehicula. Duis enim quam, fringilla et aliquam vel, accumsan a nunc. Mauris viverra elit ac faucibus suscipit. Nunc tincidunt urna vel congue vehicula. Donec laoreet nibh tempor diam elementum, nec imperdiet ante rhoncus. Mauris gravida mi dolor. Suspendisse potenti.
 \n\nSuspendisse at urna et nibh blandit laoreet. Nam cursus turpis at neque mattis ultrices. Integer ornare sollicitudin erat sit amet gravida. Cras placerat tempus urna, nec euismod eros laoreet a. Proin at ex mauris. Donec urna ante, efficitur et magna sollicitudin, imperdiet ultrices sapien. Etiam quis dui pulvinar, efficitur justo id, placerat leo. Pellentesque vel neque diam. Nunc elementum dui sed sem volutpat accumsan. Maecenas cursus ullamcorper dictum. Nunc ut odio in orci volutpat pretium et at nisi.
     </string>
+
+    <string name="autoupdate_settings_description">DemoStore will update (or not) automatically apps it has installed based on these settings</string>
+    <string name="auto_update_title">Auto-update Settings</string>
+
+    <string name="auto_update_label">Auto-update Schedule</string>
+    <string name="auto_update_disabled">Don\'t auto-update apps</string>
+    <plurals name="auto_update_schedule">
+        <item quantity="one">Check and update every minute</item>
+        <item quantity="other">Check and update %d minutes</item>
+    </plurals>
+
+    <string name="update_availability_label">Time between install and update availability</string>
+    <string name="update_availability_disabled">Don\'t fetch updates</string>
+    <plurals name="update_availability_schedule">
+        <item quantity="one">Updates available one minute after install</item>
+        <item quantity="other">Updates available %d minutes after install</item>
+    </plurals>
 </resources>
