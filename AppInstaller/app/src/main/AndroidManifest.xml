@@ -39,6 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- TODO: Explain them -->
+        <receiver
+            android:name=".worker.InstallUpdateReceiver"
+            android:permission="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES">
+            <intent-filter>
+                <action android:name="appinstaller_install_status" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".worker.UninstallUpdateReceiver"
+            android:permission="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES">
+            <intent-filter>
+                <action android:name="appinstaller_uninstall_status" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

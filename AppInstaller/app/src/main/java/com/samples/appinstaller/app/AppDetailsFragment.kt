@@ -57,32 +57,11 @@ class AppDetailsFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         context?.packageManager?.packageInstaller?.registerSessionCallback(sessionCallback)
-
-        /*
-            TODO: I have no idea what's a [Handler] and I don't know if it's ok to call it like that
-             or if there's a recommended way to deal with it on Kotlin.
-             Is [Handler] a thread itself? I avoided null as the main thread will be used instead
-         */
-        context?.registerReceiver(
-            installReceiver,
-            IntentFilter(INSTALL_INTENT_NAME),
-            SEND_INSTALL_UPDATES_PERMISSION,
-            Handler()
-        )
-
-        context?.registerReceiver(
-            uninstallReceiver,
-            IntentFilter(UNINSTALL_INTENT_NAME),
-            SEND_INSTALL_UPDATES_PERMISSION,
-            Handler()
-        )
     }
 
     override fun onStop() {
         super.onStop()
         context?.packageManager?.packageInstaller?.unregisterSessionCallback(sessionCallback)
-        context?.unregisterReceiver(uninstallReceiver)
-        context?.unregisterReceiver(installReceiver)
     }
 
     override fun onResume() {
