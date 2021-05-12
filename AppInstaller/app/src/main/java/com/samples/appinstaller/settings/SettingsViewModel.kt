@@ -3,20 +3,17 @@ package com.samples.appinstaller.settings
 import android.app.Application
 import android.content.Context
 import android.view.View
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.DataStoreFactory
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.samples.appinstaller.AppSettings
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
 import com.samples.appinstaller.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import java.io.File
 
+@ExperimentalCoroutinesApi
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication()

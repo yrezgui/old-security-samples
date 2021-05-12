@@ -1,10 +1,7 @@
 package com.samples.appinstaller
 
-import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -12,8 +9,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.samples.appinstaller.databinding.ActivityMainBinding
-import com.samples.appinstaller.settings.AppSettingsSerializer
-import com.samples.appinstaller.settings.PROTO_STORE_FILE_NAME
 
 class MainActivity : AppCompatActivity() {
 

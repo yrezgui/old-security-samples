@@ -1,10 +1,6 @@
 package com.samples.appinstaller.settings
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.samples.appinstaller.BuildConfig
 import com.samples.appinstaller.R
-import com.samples.appinstaller.app.AppDetailsFragment
 import com.samples.appinstaller.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {

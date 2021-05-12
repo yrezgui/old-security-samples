@@ -3,8 +3,8 @@ package com.samples.appinstaller.settings
 import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.datastore.core.Serializer
+import androidx.datastore.dataStore
 import com.google.protobuf.InvalidProtocolBufferException
 import com.samples.appinstaller.AppSettings
 import java.io.InputStream

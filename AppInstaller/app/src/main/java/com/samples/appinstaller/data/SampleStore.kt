@@ -22,8 +22,10 @@ val SampleStore = listOf(
         icon = R.mipmap.ic_app_citymaker_round
     ),
     AppPackage(
-        id = "com.paca.nicekart",
-        name = "Nice Kart",
+//        id = "com.paca.nicekart",
+//        name = "Nice Kart",
+        id = "com.example.game.racingpro",
+        name = "Racing Pro",
         company = "PACA SARL",
         icon = R.mipmap.ic_app_nicekart_round
     ),
