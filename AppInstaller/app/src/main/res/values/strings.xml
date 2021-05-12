@@ -31,6 +31,8 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies s
 
     <string name="update_availability_label">Time between install and update availability</string>
     <string name="update_availability_disabled">Don\'t fetch updates</string>
+    <string name="trigger_updates_check_label">Trigger updates check</string>
+    <string name="trigger_app_upgrades_label">Trigger app upgrades</string>
     <plurals name="update_availability_schedule">
         <item quantity="one">Updates available one minute after install</item>
         <item quantity="other">Updates available %d minutes after install</item>
