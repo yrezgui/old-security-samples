@@ -6,15 +6,15 @@
 
         <import type="android.view.View" />
 
-        <import type="com.samples.appinstaller.app.AppStatus" />
+        <import type="com.samples.appinstaller.appManager.AppStatus" />
 
         <variable
             name="viewmodel"
-            type="com.samples.appinstaller.app.AppDetailsViewModel" />
+            type="com.samples.appinstaller.appDetails.AppDetailsViewModel" />
 
         <variable
             name="permissionHandler"
-            type="com.samples.appinstaller.app.AppDetailsFragment.InstallPermissionHandler" />
+            type="com.samples.appinstaller.appDetails.AppDetailsFragment.InstallPermissionHandler" />
     </data>
 
     <androidx.core.widget.NestedScrollView

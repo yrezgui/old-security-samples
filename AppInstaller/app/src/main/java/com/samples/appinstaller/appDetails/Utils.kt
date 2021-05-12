@@ -1,4 +1,4 @@
-package com.samples.appinstaller.app
+package com.samples.appinstaller.appDetails
 
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter

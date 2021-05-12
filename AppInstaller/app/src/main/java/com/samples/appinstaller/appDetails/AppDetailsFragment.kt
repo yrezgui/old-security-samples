@@ -1,13 +1,11 @@
-package com.samples.appinstaller.app
+package com.samples.appinstaller.appDetails
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,6 +20,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.BuildConfig
 import com.samples.appinstaller.R
+import com.samples.appinstaller.appManager.AppStatus
+import com.samples.appinstaller.appManager.getStatusFailureName
 import com.samples.appinstaller.databinding.FragmentAppDetailsBinding
 
 const val SEND_INSTALL_UPDATES_PERMISSION = "com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"

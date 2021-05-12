@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageInstaller
 import android.util.Log
-import com.samples.appinstaller.app.AppStatus
 
 class UninstallUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent) {

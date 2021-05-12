@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.samples.appinstaller.data.SampleStore
+import com.samples.appinstaller.appManager.SampleStore
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 
 class LibraryFragment : Fragment() {

@@ -41,7 +41,7 @@
 
     <fragment
         android:id="@+id/navigation_app_details"
-        android:name="com.samples.appinstaller.app.AppDetailsFragment"
+        android:name="com.samples.appinstaller.appDetails.AppDetailsFragment"
         android:label="{appName}"
         tools:layout="@layout/fragment_app_details">
         <argument

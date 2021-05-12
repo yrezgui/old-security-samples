@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.samples.appinstaller.R
-import com.samples.appinstaller.data.AppPackage
+import com.samples.appinstaller.appManager.AppPackage
 
 class LibraryRecyclerViewAdapter(private val list: List<AppPackage>) :
     RecyclerView.Adapter<LibraryRecyclerViewAdapter.ViewHolder>() {

@@ -1,4 +1,4 @@
-package com.samples.appinstaller.app
+package com.samples.appinstaller.appManager
 
 import android.app.PendingIntent
 import android.content.Context
@@ -7,6 +7,8 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import com.samples.appinstaller.appDetails.INSTALL_INTENT_NAME
+import com.samples.appinstaller.appDetails.UNINSTALL_INTENT_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream

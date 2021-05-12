@@ -1,4 +1,4 @@
-package com.samples.appinstaller.data
+package com.samples.appinstaller.appManager
 
 import androidx.annotation.DrawableRes
 

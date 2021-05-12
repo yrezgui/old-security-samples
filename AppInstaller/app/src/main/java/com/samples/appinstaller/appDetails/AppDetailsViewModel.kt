@@ -1,4 +1,4 @@
-package com.samples.appinstaller.app
+package com.samples.appinstaller.appDetails
 
 import android.app.Application
 import android.content.Context
@@ -8,8 +8,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.samples.appinstaller.data.AppPackage
-import com.samples.appinstaller.data.SampleStore
+import com.samples.appinstaller.appManager.AppManager
+import com.samples.appinstaller.appManager.AppPackage
+import com.samples.appinstaller.appManager.AppStatus
+import com.samples.appinstaller.appManager.SampleStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
