@@ -1,20 +1,74 @@
 package com.samples.appinstaller.app
 
+import android.app.Application
+import android.content.Context
+import android.util.Log
+import android.view.View
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.samples.appinstaller.data.AppPackage
 import com.samples.appinstaller.data.SampleStore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class AppDetailsViewModel : ViewModel() {
+class AppDetailsViewModel(application: Application) : AndroidViewModel(application) {
+    private val context: Context
+        get() = getApplication()
+
+    private val appManager = AppManager(context)
     lateinit var selectedApp: AppPackage
 
-    fun loadApp(packageId: String) {
-       selectedApp = SampleStore.find { it.id == packageId }!!
+    private val _appStatus: MutableLiveData<AppStatus> = MutableLiveData(AppStatus.UNKNOWN)
+    val appStatus: LiveData<AppStatus> = _appStatus
+
+
+    private val _currentInstallSessionId: MutableLiveData<Int?> = MutableLiveData(null)
+    val currentInstallSessionId: LiveData<Int?> = _currentInstallSessionId
+
+    fun clearInstallSessionId() {
+        _currentInstallSessionId.value = null
     }
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is app Fragment"
+    fun checkAppStatus() {
+        if(currentInstallSessionId.value == null) {
+            _appStatus.value = appManager.checkAppStatus(selectedApp.id)
+            Log.d("AppSTATUS", _appStatus.value.toString())
+        }
     }
-    val text: LiveData<String> = _text
+
+    fun setAppStatus(appStatus: AppStatus) {
+        Log.d("SET AppSTATUS", appStatus.toString())
+        _appStatus.value = appStatus
+    }
+
+    fun loadApp(packageId: String) {
+        selectedApp = SampleStore.find { it.id == packageId }!!
+        checkAppStatus()
+    }
+
+    fun uninstallApp(view: View) {
+        appManager.uninstallApp(selectedApp.id)
+    }
+
+    fun installApp(view: View) {
+        viewModelScope.launch {
+            // Simulate downloading an APK
+            _appStatus.value = AppStatus.DOWNLOADING
+            delay(3000L)
+
+            val sessionId = appManager.createInstallSession()
+            _currentInstallSessionId.value = sessionId
+
+            _appStatus.value = AppStatus.INSTALLING
+            appManager.installApp(sessionId, context.assets.open("${selectedApp.id}.apk"))
+
+            _appStatus.value = AppStatus.INSTALLED
+        }
+    }
+
+    fun openApp(view: View) {
+        appManager.openApp(selectedApp.id)
+    }
 }

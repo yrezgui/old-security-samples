@@ -1,109 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <data>
+
+        <import type="android.view.View" />
+        <import type="com.samples.appinstaller.app.AppStatus" />
+
+        <variable
+            name="viewmodel"
+            type="com.samples.appinstaller.app.AppDetailsViewModel" />
+        <variable
+            name="permissionHandler"
+            type="com.samples.appinstaller.app.AppDetailsFragment.InstallPermissionHandler" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginBottom="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="96dp"
-                android:layout_height="96dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="8dp"
-                android:src="@mipmap/ic_launcher" />
+            android:layout_margin="16dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:orientation="vertical">
-                <TextView
-                    android:id="@+id/app_name"
-                    tools:text="App name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceListItem"
-                    android:textStyle="bold"/>
-                <TextView
-                    android:id="@+id/company"
-                    tools:text="Company"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceListItemSecondary" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/install_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Install" />
+                android:layout_marginBottom="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <!-- TODO: Fix ImageView mipmap, currently displaying grey background -->
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:src="@{viewmodel.selectedApp.icon}" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/app_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewmodel.selectedApp.name}"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        android:textStyle="bold"
+                        tools:text="App name" />
+
+                    <TextView
+                        android:id="@+id/company"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{viewmodel.selectedApp.company}"
+                        android:textAppearance="?attr/textAppearanceListItemSecondary"
+                        tools:text="Company" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{viewmodel.appStatus.toString()}" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Request Permission"
+                    android:visibility="@{viewmodel.appStatus == AppStatus.UNKNOWN ? View.VISIBLE : View.GONE}"
+                    android:onClick="@{permissionHandler.showRationale}"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Install"
+                    android:visibility="@{viewmodel.appStatus == AppStatus.UNINSTALLED ? View.VISIBLE : View.GONE}"
+                    android:onClick="@{viewmodel.installApp}"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="@{(viewmodel.appStatus == AppStatus.INSTALLING || viewmodel.appStatus == AppStatus.DOWNLOADING) ? View.VISIBLE : View.GONE}">
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cancel" />
+
+                    <Space
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0" />
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:text="Open"
+                        android:onClick="@{viewmodel.openApp}" />
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="@{(viewmodel.appStatus == AppStatus.DOWNLOADING) ? View.VISIBLE : View.GONE}" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="@{viewmodel.appStatus == AppStatus.INSTALLED ? View.VISIBLE : View.GONE}">
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Uninstall"
+                        android:onClick="@{viewmodel.uninstallApp}" />
+
+                    <Space
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0" />
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Open"
+                        android:onClick="@{viewmodel.openApp}" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:text="@string/large_text" />
 
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/cancel_button"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Cancel" />
-
-            <Space
-                android:layout_weight="0"
-                android:layout_height="wrap_content"
-                android:layout_width="20dp"/>
-
-            <Button
-                android:id="@+id/open_button"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Open" />
-
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:min="0"
-            android:max="100" />
-        <TextView
-            android:id="@+id/progress_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="?attr/colorSecondary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:text="@string/large_text" />
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+</layout>
