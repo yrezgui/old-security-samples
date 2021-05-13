@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 'android-S'
     buildToolsVersion "30.0.3"
 
     defaultConfig {
@@ -53,6 +53,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
     implementation 'androidx.work:work-runtime-ktx:2.7.0-alpha03'
+
+    implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
 
     implementation 'androidx.datastore:datastore:1.0.0-beta01'
     implementation 'com.google.protobuf:protobuf-javalite:3.10.0'
