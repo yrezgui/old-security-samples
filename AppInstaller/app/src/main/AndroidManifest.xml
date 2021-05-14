@@ -12,9 +12,15 @@
     <!-- We use this permission to install apps -->
     <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <!-- We use this permission to uninstall apps -->
     <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!-- We use this permission to install & uninstall apps with a better user experience -->
+    <!-- TODO: Confirm its the right explanation -->
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+
     <!-- We use this permission to get the list of our installed apps -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
