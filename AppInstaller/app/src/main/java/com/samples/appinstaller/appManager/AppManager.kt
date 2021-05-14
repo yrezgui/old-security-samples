@@ -6,7 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import androidx.core.content.ContextCompat
+import androidx.core.os.BuildCompat
 import com.samples.appinstaller.appDetails.INSTALL_INTENT_NAME
 import com.samples.appinstaller.appDetails.UNINSTALL_INTENT_NAME
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +19,9 @@ import java.io.InputStream
 class AppManager(private val context: Context) {
     private val packageManager: PackageManager
         get() = context.packageManager
+
+    private val packageInstaller: PackageInstaller
+        get() = context.packageManager.packageInstaller
 
     fun openApp(packageId: String) {
         packageManager.getLaunchIntentForPackage(packageId)?.let {
@@ -50,39 +56,84 @@ class AppManager(private val context: Context) {
         }
 
         val statusPendingIntent = PendingIntent.getBroadcast(context, 0, statusIntent, 0)
-        packageManager.packageInstaller.uninstall(packageId, statusPendingIntent.intentSender)
+        packageInstaller.uninstall(packageId, statusPendingIntent.intentSender)
     }
 
-    // TODO: How to check this permission before API 26
-    private fun canRequestPackageInstalls() = packageManager.canRequestPackageInstalls()
-
-    suspend fun createInstallSession(): Int {
-        return withContext(Dispatchers.IO) {
-            val params = SessionParams(SessionParams.MODE_FULL_INSTALL)
-            params.setInstallReason(PackageManager.INSTALL_REASON_USER)
-
-            return@withContext packageManager.packageInstaller.createSession(params)
+    @Suppress("DEPRECATION")
+    private fun canRequestPackageInstalls(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            packageManager.canRequestPackageInstalls()
+        } else {
+            Settings.Global.getInt(null, Settings.Global.INSTALL_NON_MARKET_APPS, 0) == 1
         }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun createInstallSession(appName: String): Int {
+        return withContext(Dispatchers.IO) {
+            val params = SessionParams(SessionParams.MODE_FULL_INSTALL).apply {
+                setAppLabel(appName)
+            }
+
+            if (BuildCompat.isAtLeastS()) {
+                params.setRequireUserAction(false)
+            }
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                params.setInstallReason(PackageManager.INSTALL_REASON_USER)
+            }
+
+            return@withContext packageInstaller.createSession(params)
+        }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun installApp(sessionId: Int, apkInputStream: InputStream) {
         withContext(Dispatchers.IO) {
-            val session = packageManager.packageInstaller.openSession(sessionId)
+            val session = packageInstaller.openSession(sessionId)
 
             session.openWrite("package", 0, -1).use { destination ->
                 apkInputStream.copyTo(destination)
             }
 
-            val statusIntent = Intent(INSTALL_INTENT_NAME)
-            statusIntent.setPackage(context.packageName)
+            val statusIntent = Intent(INSTALL_INTENT_NAME).apply {
+                setPackage(context.packageName)
+            }
+
             val statusPendingIntent = PendingIntent.getBroadcast(context, 0, statusIntent, 0)
             session.commit(statusPendingIntent.intentSender)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private suspend fun getInstallerPackageName(packageName: String): String? {
+        return withContext(Dispatchers.IO) {
+            return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                packageManager.getInstallSourceInfo(packageName).installingPackageName
+            } else {
+                packageManager.getInstallerPackageName(packageName)
+            }
+        }
+    }
+
+    suspend fun getInstalledApps(): List<String> {
+        val appInstallerPackage = context.packageName
+
+        return withContext(Dispatchers.IO) {
+            return@withContext packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                .mapNotNull {
+                    if(getInstallerPackageName(it.packageName) == appInstallerPackage) {
+                        it.packageName
+                    } else {
+                        null
+                    }
+                }
         }
     }
 }
 
 enum class AppStatus {
-    UNKNOWN, UNINSTALLED, INSTALLED, STAGING, DOWNLOADING, INSTALLING, UPGRADE
+    UNKNOWN, UNINSTALLED, INSTALLED, DOWNLOADING, INSTALLING, UPGRADE
 }
 
 private val UnexpectedStatusValue = Exception("Status value is unexpected")
