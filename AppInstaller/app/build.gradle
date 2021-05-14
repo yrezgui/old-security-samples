@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId "com.samples.appinstaller"
-        // TODO: Revert back to API 21
-        minSdkVersion 26
+        // TODO: Set minSDK to 21
+        minSdkVersion 30
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
