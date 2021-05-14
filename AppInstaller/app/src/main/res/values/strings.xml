@@ -18,19 +18,16 @@
     <string name="trigger_auto_updates_manually_label">Trigger auto-updating manually</string>
 
     <string name="auto_update_disabled">Don\'t auto-update apps</string>
-    <plurals name="auto_update_schedule">
-        <item quantity="one">Check and update every minute</item>
-        <item quantity="other">Check and update %d minutes</item>
-    </plurals>
+    <string name="auto_update_schedule">Check and update %d minutes</string>
 
     <string name="update_availability_period_label">Time between install and update availability</string>
     <string name="trigger_new_updates_label">Trigger adding updates manually</string>
 
     <string name="update_availability_disabled">No updates</string>
-    <plurals name="update_availability_period">
-        <item quantity="one">After one minute</item>
-        <item quantity="other">After %d minutes</item>
-    </plurals>
+    <string name="update_availability_period">After %d minutes</string>
+    
+    <string name="install_notification_title">Install app</string>
+    <string name="install_notification_description">Click here to install the app %s</string>
 
     <string name="large_text">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.

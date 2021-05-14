@@ -7,20 +7,18 @@ message AppSettings {
 
   enum AutoUpdateSchedule {
     MANUAL = 0;
-    EVERY_1_MINUTE = 1;
-    EVERY_5_MINUTES = 2;
-    EVERY_10_MINUTES = 3;
-    EVERY_60_MINUTES = 4;
+    EVERY_15_MINUTES = 1;
+    EVERY_30_MINUTES = 2;
+    EVERY_60_MINUTES = 3;
   }
 
   enum UpdateAvailabilityPeriod {
     NONE = 0;
-    AFTER_1_MINUTE = 1;
-    AFTER_5_MINUTES = 2;
-    AFTER_10_MINUTES = 3;
-    AFTER_60_MINUTES = 4;
+    AFTER_15_MINUTES = 1;
+    AFTER_30_MINUTES = 2;
+    AFTER_60_MINUTES = 3;
   }
 
-  AutoUpdateSchedule autoUpdateSchedule = 3;
+  AutoUpdateSchedule autoUpdateSchedule = 1;
   UpdateAvailabilityPeriod updateAvailabilityPeriod = 2;
 }

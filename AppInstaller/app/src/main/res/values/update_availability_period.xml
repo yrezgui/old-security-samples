@@ -2,9 +2,8 @@
 <resources>
     <string-array name="update_availability_period">
         <item>No updates</item>
-        <item>After one minute</item>
-        <item>After 5 minutes</item>
-        <item>After 10 minutes</item>
+        <item>After 15 minutes</item>
+        <item>After 30 minutes</item>
         <item>After 60 minutes</item>
     </string-array>
 </resources>
