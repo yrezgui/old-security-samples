@@ -50,11 +50,11 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
         checkAppStatus()
     }
 
-    fun uninstallApp(view: View) {
+    fun uninstallApp(@Suppress("UNUSED_PARAMETER") view: View) {
         appManager.uninstallApp(selectedApp.id)
     }
 
-    fun installApp(view: View) {
+    fun installApp(@Suppress("UNUSED_PARAMETER") view: View) {
         viewModelScope.launch {
             // Simulate downloading an APK
             _appStatus.value = AppStatus.DOWNLOADING
@@ -70,7 +70,7 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun openApp(view: View) {
+    fun openApp(@Suppress("UNUSED_PARAMETER") view: View) {
         appManager.openApp(selectedApp.id)
     }
 }
