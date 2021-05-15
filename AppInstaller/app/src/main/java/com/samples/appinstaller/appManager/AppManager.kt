@@ -120,7 +120,7 @@ class AppManager(private val context: Context) {
         val appInstallerPackage = context.packageName
 
         return withContext(Dispatchers.IO) {
-            return@withContext packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            return@withContext packageManager.getInstalledApplications(0)
                 .mapNotNull {
                     if(getInstallerPackageName(it.packageName) == appInstallerPackage) {
                         it.packageName
