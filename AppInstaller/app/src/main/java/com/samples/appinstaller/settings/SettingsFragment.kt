@@ -11,7 +11,9 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.samples.appinstaller.R
 import com.samples.appinstaller.databinding.FragmentSettingsBinding
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 class SettingsFragment : Fragment() {
     private val viewModel: SettingsViewModel by viewModels()
     private lateinit var binding: FragmentSettingsBinding
