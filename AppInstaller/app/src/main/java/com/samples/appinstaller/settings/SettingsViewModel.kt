@@ -24,11 +24,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             else -> {
                 val quantity = getAutoUpdateScheduleInMinutes(settings.autoUpdateSchedule)
 
-                context.resources.getQuantityString(
-                    R.plurals.auto_update_schedule,
-                    quantity,
-                    quantity
-                )
+                context.resources.getString(R.string.auto_update_schedule, quantity)
             }
         }
     }.asLiveData()
@@ -36,15 +32,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val updateAvailabilityPeriod = context.appSettings.data.mapLatest { settings ->
         when (settings.updateAvailabilityPeriod) {
             UpdateAvailabilityPeriod.NONE -> context.getString(R.string.update_availability_disabled)
+            UpdateAvailabilityPeriod.AFTER_30_SECONDS -> {
+                val quantity =
+                    getUpdateAvailabilityPeriodQuantity(settings.updateAvailabilityPeriod)
+
+                context.resources.getString(R.string.update_availability_seconds_period, quantity)
+            }
             else -> {
                 val quantity =
-                    getUpdateAvailabilityPeriodInMinutes(settings.updateAvailabilityPeriod)
+                    getUpdateAvailabilityPeriodQuantity(settings.updateAvailabilityPeriod)
 
-                context.resources.getQuantityString(
-                    R.plurals.update_availability_period,
-                    quantity,
-                    quantity
-                )
+                context.resources.getString(R.string.update_availability_minutes_period, quantity)
             }
         }
     }.asLiveData()

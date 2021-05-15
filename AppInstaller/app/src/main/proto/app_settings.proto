@@ -14,9 +14,11 @@ message AppSettings {
 
   enum UpdateAvailabilityPeriod {
     NONE = 0;
-    AFTER_15_MINUTES = 1;
-    AFTER_30_MINUTES = 2;
-    AFTER_60_MINUTES = 3;
+    AFTER_30_SECONDS = 1;
+    AFTER_5_MINUTES = 2;
+    AFTER_15_MINUTES = 3;
+    AFTER_30_MINUTES = 4;
+    AFTER_60_MINUTES = 5;
   }
 
   AutoUpdateSchedule autoUpdateSchedule = 1;

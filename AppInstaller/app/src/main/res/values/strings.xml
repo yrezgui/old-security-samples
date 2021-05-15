@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">App Installer</string>
     <string name="title_store">Demo Store</string>
     <string name="title_library">My Apps</string>
@@ -21,15 +21,15 @@
     <string name="auto_update_schedule">Check and update %d minutes</string>
 
     <string name="update_availability_period_label">Time between install and update availability</string>
-    <string name="trigger_new_updates_label">Trigger adding updates manually</string>
 
     <string name="update_availability_disabled">No updates</string>
-    <string name="update_availability_period">After %d minutes</string>
+    <string name="update_availability_seconds_period">After %d seconds</string>
+    <string name="update_availability_minutes_period">After %d minutes</string>
     
     <string name="install_notification_title">Install app</string>
     <string name="install_notification_description">Click here to install the app %s</string>
 
-    <string name="large_text">
+    <string name="large_text" tools:ignore="Typos">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.
 \n\nNunc maximus aliquam purus:
 \n\n&#8226; Cras accumsan orci sed dolor eleifend scelerisque.
