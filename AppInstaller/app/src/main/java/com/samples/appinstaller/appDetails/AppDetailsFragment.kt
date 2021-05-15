@@ -93,6 +93,7 @@ class AppDetailsFragment : Fragment() {
             Log.d("SessionCallback", "onFinished sessionId: $sessionId, success: $success")
             if(viewModel.currentInstallSessionId.value == sessionId) {
                 viewModel.clearInstallSessionId()
+                viewModel.setAppStatus(AppStatus.INSTALLED)
             }
         }
     }
