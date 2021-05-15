@@ -12,8 +12,10 @@ import com.samples.appinstaller.appManager.AppManager
 import com.samples.appinstaller.appManager.AppPackage
 import com.samples.appinstaller.appManager.AppStatus
 import com.samples.appinstaller.appManager.SampleStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AppDetailsViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
@@ -34,7 +36,7 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun checkAppStatus() {
-        if(currentInstallSessionId.value == null) {
+        if (currentInstallSessionId.value == null) {
             _appStatus.value = appManager.checkAppStatus(selectedApp.id)
             Log.d("AppSTATUS", _appStatus.value.toString())
         }
@@ -54,19 +56,21 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
         appManager.uninstallApp(selectedApp.id)
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     fun installApp(@Suppress("UNUSED_PARAMETER") view: View) {
         viewModelScope.launch {
             // Simulate downloading an APK
             _appStatus.value = AppStatus.DOWNLOADING
             delay(3000L)
 
-            val sessionId = appManager.createInstallSession()
+            val sessionId = appManager.createInstallSession(selectedApp.name)
             _currentInstallSessionId.value = sessionId
 
             _appStatus.value = AppStatus.INSTALLING
-            appManager.installApp(sessionId, context.assets.open("${selectedApp.id}.apk"))
 
-            _appStatus.value = AppStatus.INSTALLED
+            withContext(Dispatchers.IO) {
+                appManager.installApp(sessionId, context.assets.open("${selectedApp.id}.apk"))
+            }
         }
     }
 
