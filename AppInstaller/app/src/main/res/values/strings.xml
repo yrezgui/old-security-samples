@@ -25,9 +25,20 @@
     <string name="update_availability_disabled">No updates</string>
     <string name="update_availability_seconds_period">After %d seconds</string>
     <string name="update_availability_minutes_period">After %d minutes</string>
-    
+
+    <string name="install_notification_channel">Install app</string>
     <string name="install_notification_title">Install app</string>
     <string name="install_notification_description">Click here to install the app %s</string>
+
+    <string name="uninstall_notification_channel">Uninstall app</string>
+    <string name="uninstall_notification_title">Uninstall app</string>
+    <string name="uninstall_notification_description">Click here to uninstall the app %s</string>
+
+    <string name="update_notification_channel">Update app</string>
+    <string name="update_notification_title">Update app</string>
+    <string name="update_notification_description">Click here to update the app %s</string>
+    <string name="multiple_updates_notification_title">Update app</string>
+    <string name="multiple_updates_notification_description">Check out these %s app updates</string>
 
     <string name="large_text" tools:ignore="Typos">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam iaculis ultricies sapien, ultrices feugiat libero malesuada non.

@@ -37,8 +37,10 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun checkAppStatus() {
         if (currentInstallSessionId.value == null) {
-            _appStatus.value = appManager.checkAppStatus(selectedApp.id)
-            Log.d("AppSTATUS", _appStatus.value.toString())
+            viewModelScope.launch {
+                _appStatus.value = appManager.checkAppStatus(selectedApp.id)
+                Log.d("AppSTATUS", _appStatus.value.toString())
+            }
         }
     }
 
@@ -53,7 +55,12 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun uninstallApp(@Suppress("UNUSED_PARAMETER") view: View) {
-        appManager.uninstallApp(selectedApp.id)
+        viewModelScope.launch {
+            // Simulate delay (e.g. slower devices)
+            delay(3000L)
+
+            appManager.uninstallApp(selectedApp.id)
+        }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")

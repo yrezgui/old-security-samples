@@ -3,22 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.samples.appinstaller">
 
-    <!-- TODO: Confirm protectionLevel to signature or signatureOrSystem -->
     <!-- We create this permission to only let the system sends us broadcasts on our app installs -->
     <permission
         android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
-        android:protectionLevel="signatureOrSystem" />
+        android:protectionLevel="signatureOrSystem"
+        tools:ignore="SignatureOrSystemPermissions" />
 
     <!-- We use this permission to install apps -->
-    <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- We use this permission to uninstall apps -->
-    <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
     <!-- We use this permission to install & uninstall apps with a better user experience -->
-    <!-- TODO: Confirm its the right explanation -->
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
 
     <!-- We use this permission to get the list of our installed apps -->
@@ -46,19 +43,14 @@
             </intent-filter>
         </activity>
 
-        <!-- TODO: Explain them -->
+        <!-- We receive install, update and uninstall broadcast messages through this receiver -->
         <receiver
-            android:name=".worker.InstallUpdateReceiver"
+            android:name=".workers.AppBroadcastReceiver"
             android:permission="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES">
             <intent-filter>
                 <action android:name="appinstaller_install_status" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".worker.UninstallUpdateReceiver"
-            android:permission="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES">
-            <intent-filter>
                 <action android:name="appinstaller_uninstall_status" />
+                <action android:name="appinstaller_upgrade_status" />
             </intent-filter>
         </receiver>
     </application>

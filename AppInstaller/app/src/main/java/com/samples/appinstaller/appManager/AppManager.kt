@@ -3,6 +3,7 @@ package com.samples.appinstaller.appManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageManager
@@ -10,8 +11,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.core.os.BuildCompat
-import com.samples.appinstaller.appDetails.INSTALL_INTENT_NAME
-import com.samples.appinstaller.appDetails.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -29,16 +30,21 @@ class AppManager(private val context: Context) {
         }
     }
 
-    private fun isAppInstalled(packageId: String): Boolean {
-        return try {
-            packageManager.getPackageInfo(packageId, 0)
-            true
-        } catch (e: PackageManager.NameNotFoundException) {
-            false
+    suspend fun getPackageInfo(packageId: String): PackageInfo? {
+        return withContext(Dispatchers.IO) {
+            return@withContext try {
+                packageManager.getPackageInfo(packageId, 0)
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
         }
     }
 
-    fun checkAppStatus(packageId: String): AppStatus {
+    private suspend fun isAppInstalled(packageId: String): Boolean {
+        return getPackageInfo(packageId) != null
+    }
+
+    suspend fun checkAppStatus(packageId: String): AppStatus {
         if(!canRequestPackageInstalls()) {
             return AppStatus.UNKNOWN
         }

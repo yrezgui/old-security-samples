@@ -24,11 +24,6 @@ import com.samples.appinstaller.appManager.AppStatus
 import com.samples.appinstaller.appManager.getStatusFailureName
 import com.samples.appinstaller.databinding.FragmentAppDetailsBinding
 
-const val SEND_INSTALL_UPDATES_PERMISSION = "com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
-
-const val INSTALL_INTENT_NAME = "appinstaller_install_status"
-const val UNINSTALL_INTENT_NAME = "appinstaller_uninstall_status"
-
 class AppDetailsFragment : Fragment() {
     private val viewModel: AppDetailsViewModel by viewModels()
     private val args: AppDetailsFragmentArgs by navArgs()
