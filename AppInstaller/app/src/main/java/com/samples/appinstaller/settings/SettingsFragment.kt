@@ -6,13 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.findFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.samples.appinstaller.R
 import com.samples.appinstaller.databinding.FragmentSettingsBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @ExperimentalCoroutinesApi
 class SettingsFragment : Fragment() {
     private val viewModel: SettingsViewModel by viewModels()
@@ -29,6 +32,7 @@ class SettingsFragment : Fragment() {
             container,
             false
         )
+
         binding.viewmodel = viewModel
         binding.settingsHandler = SettingsHandler()
         binding.lifecycleOwner = this

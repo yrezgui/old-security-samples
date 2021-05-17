@@ -12,7 +12,9 @@ import com.samples.appinstaller.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @ExperimentalCoroutinesApi
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
@@ -22,9 +24,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         when (settings.autoUpdateSchedule) {
             AutoUpdateSchedule.MANUAL -> context.getString(R.string.auto_update_disabled)
             else -> {
-                val quantity = getAutoUpdateScheduleInMinutes(settings.autoUpdateSchedule)
-
-                context.resources.getString(R.string.auto_update_schedule, quantity)
+                context.resources.getString(
+                    R.string.auto_update_schedule,
+                    settings.autoUpdateSchedule.toDuration().inMinutes
+                )
             }
         }
     }.asLiveData()
@@ -33,16 +36,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         when (settings.updateAvailabilityPeriod) {
             UpdateAvailabilityPeriod.NONE -> context.getString(R.string.update_availability_disabled)
             UpdateAvailabilityPeriod.AFTER_30_SECONDS -> {
-                val quantity =
-                    getUpdateAvailabilityPeriodQuantity(settings.updateAvailabilityPeriod)
-
-                context.resources.getString(R.string.update_availability_seconds_period, quantity)
+                context.resources.getString(
+                    R.string.update_availability_seconds_period,
+                    settings.updateAvailabilityPeriod.toDuration().inSeconds.toInt()
+                )
             }
             else -> {
-                val quantity =
-                    getUpdateAvailabilityPeriodQuantity(settings.updateAvailabilityPeriod)
-
-                context.resources.getString(R.string.update_availability_minutes_period, quantity)
+                context.resources.getString(
+                    R.string.update_availability_minutes_period,
+                    settings.updateAvailabilityPeriod.toDuration().inMinutes.toInt()
+                )
             }
         }
     }.asLiveData()
@@ -57,6 +60,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    /**
+     * Setter for the [UpdateAvailabilityPeriod] setting
+     */
     fun setUpdateAvailabilityPeriod(value: Int) {
         viewModelScope.launch {
             context.appSettings.updateData { currentSettings ->

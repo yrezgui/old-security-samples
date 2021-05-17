@@ -27,7 +27,6 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
     private val _appStatus: MutableLiveData<AppStatus> = MutableLiveData(AppStatus.UNKNOWN)
     val appStatus: LiveData<AppStatus> = _appStatus
 
-
     private val _currentInstallSessionId: MutableLiveData<Int?> = MutableLiveData(null)
     val currentInstallSessionId: LiveData<Int?> = _currentInstallSessionId
 
@@ -56,9 +55,6 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun uninstallApp(@Suppress("UNUSED_PARAMETER") view: View) {
         viewModelScope.launch {
-            // Simulate delay (e.g. slower devices)
-            delay(3000L)
-
             appManager.uninstallApp(selectedApp.id)
         }
     }
