@@ -1,6 +1,5 @@
 package com.samples.appinstaller.appDetails
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
@@ -21,7 +20,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.BuildConfig
 import com.samples.appinstaller.R
 import com.samples.appinstaller.appManager.AppStatus
-import com.samples.appinstaller.appManager.getStatusFailureName
 import com.samples.appinstaller.databinding.FragmentAppDetailsBinding
 
 class AppDetailsFragment : Fragment() {
@@ -89,64 +87,6 @@ class AppDetailsFragment : Fragment() {
             if(viewModel.currentInstallSessionId.value == sessionId) {
                 viewModel.clearInstallSessionId()
                 viewModel.setAppStatus(AppStatus.INSTALLED)
-            }
-        }
-    }
-
-    private val installReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val extras = intent.extras!!
-            val status = extras.getInt(PackageInstaller.EXTRA_STATUS)
-            val message = extras.getString(PackageInstaller.EXTRA_STATUS_MESSAGE)
-
-            Log.d("InstallReceiver", "status: $status // message: $message")
-
-            when (status) {
-                PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                    viewModel.setAppStatus(AppStatus.INSTALLING)
-                    val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
-                    startActivity(confirmIntent)
-                }
-                PackageInstaller.STATUS_SUCCESS -> {
-                    viewModel.clearInstallSessionId()
-                    viewModel.setAppStatus(AppStatus.INSTALLED)
-                }
-                PackageInstaller.STATUS_FAILURE,
-                PackageInstaller.STATUS_FAILURE_ABORTED,
-                PackageInstaller.STATUS_FAILURE_BLOCKED,
-                PackageInstaller.STATUS_FAILURE_CONFLICT,
-                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-                PackageInstaller.STATUS_FAILURE_INVALID,
-                PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    Log.d("InstallReceiver FAILURE", "status: $status (${getStatusFailureName(status)}) // message: $message")
-
-                    viewModel.clearInstallSessionId()
-                    viewModel.setAppStatus(AppStatus.UNINSTALLED)
-                    showSnackbar("Error happened during installation: ${getStatusFailureName(status)}")
-                }
-            }
-        }
-    }
-
-    private val uninstallReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val extras = intent.extras!!
-            val status = extras.getInt(PackageInstaller.EXTRA_STATUS)
-            val message = extras.getString(PackageInstaller.EXTRA_STATUS_MESSAGE)
-
-            Log.d("UninstallReceiver", "status: $status // message: $message")
-
-            when (status) {
-                PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                    val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
-                    startActivity(confirmIntent)
-                }
-                PackageInstaller.STATUS_SUCCESS -> {
-                    viewModel.setAppStatus(AppStatus.UNINSTALLED)
-                }
-                else -> {
-                    showSnackbar("Error happened during uninstallation")
-                }
             }
         }
     }
