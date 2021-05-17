@@ -9,8 +9,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.samples.appinstaller.appManager.AppManager
-import com.samples.appinstaller.appManager.AppPackage
 import com.samples.appinstaller.appManager.AppStatus
+import com.samples.appinstaller.appManager.InstalledApp
 import com.samples.appinstaller.appManager.SampleStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,7 +22,7 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
         get() = getApplication()
 
     private val appManager = AppManager(context)
-    lateinit var selectedApp: AppPackage
+    lateinit var selectedApp: InstalledApp
 
     private val _appStatus: MutableLiveData<AppStatus> = MutableLiveData(AppStatus.UNKNOWN)
     val appStatus: LiveData<AppStatus> = _appStatus
@@ -37,7 +37,7 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
     fun checkAppStatus() {
         if (currentInstallSessionId.value == null) {
             viewModelScope.launch {
-                _appStatus.value = appManager.checkAppStatus(selectedApp.id)
+                _appStatus.value = appManager.checkAppStatus(selectedApp.app.id)
                 Log.d("AppSTATUS", _appStatus.value.toString())
             }
         }
@@ -49,13 +49,12 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun loadApp(packageId: String) {
-        selectedApp = SampleStore.find { it.id == packageId }!!
-        checkAppStatus()
+        selectedApp = InstalledApp(SampleStore.find { it.id == packageId }!!, false)
     }
 
     fun uninstallApp(@Suppress("UNUSED_PARAMETER") view: View) {
         viewModelScope.launch {
-            appManager.uninstallApp(selectedApp.id)
+            appManager.uninstallApp(selectedApp.app.id)
         }
     }
 
@@ -66,18 +65,18 @@ class AppDetailsViewModel(application: Application) : AndroidViewModel(applicati
             _appStatus.value = AppStatus.DOWNLOADING
             delay(3000L)
 
-            val sessionId = appManager.createInstallSession(selectedApp.name)
+            val sessionId = appManager.createInstallSession(selectedApp.app.name)
             _currentInstallSessionId.value = sessionId
 
             _appStatus.value = AppStatus.INSTALLING
 
             withContext(Dispatchers.IO) {
-                appManager.installApp(sessionId, context.assets.open("${selectedApp.id}.apk"))
+                appManager.installApp(sessionId, context.assets.open("${selectedApp.app.id}.apk"))
             }
         }
     }
 
     fun openApp(@Suppress("UNUSED_PARAMETER") view: View) {
-        appManager.openApp(selectedApp.id)
+        appManager.openApp(selectedApp.app.id)
     }
 }

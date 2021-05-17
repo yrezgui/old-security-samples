@@ -41,7 +41,7 @@
                     android:layout_height="96dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
-                    mipmap="@{viewmodel.selectedApp.icon}"
+                    mipmap="@{viewmodel.selectedApp.app.icon}"
                     tools:src="@mipmap/ic_launcher"/>
 
                 <LinearLayout
@@ -54,7 +54,7 @@
                         android:id="@+id/app_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewmodel.selectedApp.name}"
+                        android:text="@{viewmodel.selectedApp.app.name}"
                         android:textAppearance="?attr/textAppearanceListItem"
                         android:textStyle="bold"
                         tools:text="App name" />
@@ -63,7 +63,7 @@
                         android:id="@+id/company"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{viewmodel.selectedApp.company}"
+                        android:text="@{viewmodel.selectedApp.app.company}"
                         android:textAppearance="?attr/textAppearanceListItemSecondary"
                         tools:text="Company" />
                 </LinearLayout>
@@ -121,7 +121,6 @@
                 </LinearLayout>
 
                 <ProgressBar
-                    android:id="@+id/progress_bar"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

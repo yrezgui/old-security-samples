@@ -8,3 +8,8 @@ data class AppPackage(
     val company: String,
     @DrawableRes val icon: Int
 )
+
+data class InstalledApp(
+    val app: AppPackage,
+    val isUpdateAvailable: Boolean = false
+)
