@@ -85,7 +85,7 @@ class AppManager(private val context: Context) {
                 params.setRequireUserAction(false)
             }
 
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 params.setInstallReason(PackageManager.INSTALL_REASON_USER)
             }
 
@@ -136,6 +136,22 @@ class AppManager(private val context: Context) {
                 }
         }
     }
+
+    suspend fun getInstalledPackageMap(): Map<String, PackageInfo> {
+        val appInstallerPackage = context.packageName
+
+        return withContext(Dispatchers.IO) {
+            return@withContext packageManager.getInstalledPackages(0)
+                .mapNotNull {
+                    if (getInstallerPackageName(it.packageName) == appInstallerPackage) {
+                        it.packageName to it
+                    } else {
+                        null
+                    }
+                }
+                .toMap()
+        }
+    }
 }
 
 enum class AppStatus {
@@ -145,7 +161,7 @@ enum class AppStatus {
 private val UnexpectedStatusValue = Exception("Status value is unexpected")
 
 fun getStatusFailureName(value: Int): String {
-    return when(value) {
+    return when (value) {
         PackageInstaller.STATUS_FAILURE -> "Failure"
         PackageInstaller.STATUS_FAILURE_ABORTED -> "Aborted"
         PackageInstaller.STATUS_FAILURE_BLOCKED -> "Blocked"

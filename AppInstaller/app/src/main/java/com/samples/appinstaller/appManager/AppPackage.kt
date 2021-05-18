@@ -6,7 +6,9 @@ data class AppPackage(
     val id: String,
     val name: String,
     val company: String,
-    @DrawableRes val icon: Int
+    @DrawableRes val icon: Int,
+    val isInstalled: Boolean = false,
+    val isUpdateAvailable: Boolean = false
 )
 
 data class InstalledApp(
