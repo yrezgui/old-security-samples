@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.samples.appinstaller.AppViewModel
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
+import com.samples.appinstaller.store.StoreRecyclerViewAdapter
 
 class LibraryFragment : Fragment() {
-    private val viewModel: LibraryViewModel by viewModels()
+    private val appViewModel: AppViewModel by activityViewModels()
 
     private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
@@ -22,12 +25,12 @@ class LibraryFragment : Fragment() {
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
 
+        val adapter = LibraryRecyclerViewAdapter(emptyList())
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = LibraryRecyclerViewAdapter(emptyList())
+        binding.recyclerView.adapter = adapter
 
-        viewModel.loadInstalledApps()
-        viewModel.installedApps.observe(viewLifecycleOwner) { installedApps ->
-            binding.recyclerView.adapter = LibraryRecyclerViewAdapter(installedApps)
+        appViewModel.library.observe(viewLifecycleOwner) {
+            adapter.updateData(it.values.toList())
         }
 
         return binding.root

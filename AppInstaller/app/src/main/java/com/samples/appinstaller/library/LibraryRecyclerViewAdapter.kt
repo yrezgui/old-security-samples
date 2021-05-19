@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.samples.appinstaller.R
 import com.samples.appinstaller.appManager.AppPackage
 
-class LibraryRecyclerViewAdapter(private val list: List<AppPackage>) :
+class LibraryRecyclerViewAdapter(private var list: List<AppPackage>) :
     RecyclerView.Adapter<LibraryRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -33,8 +33,12 @@ class LibraryRecyclerViewAdapter(private val list: List<AppPackage>) :
         viewHolder.appPackage = app
         viewHolder.appNameTextView.text = app.name
         viewHolder.companyTextView.text = app.company
-        viewHolder.updateTextView.visibility = View.INVISIBLE
         viewHolder.iconImageView.setImageResource(app.icon)
+        viewHolder.updateTextView.visibility = if (app.isUpdateAvailable) {
+            View.VISIBLE
+        } else {
+            View.INVISIBLE
+        }
 
         viewHolder.itemView.setOnClickListener {
             it.findNavController().navigate(
@@ -47,4 +51,9 @@ class LibraryRecyclerViewAdapter(private val list: List<AppPackage>) :
     }
 
     override fun getItemCount() = list.size
+
+    fun updateData(list: List<AppPackage>) {
+        this.list = list
+        this.notifyDataSetChanged()
+    }
 }

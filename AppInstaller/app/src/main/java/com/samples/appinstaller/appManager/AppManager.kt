@@ -45,11 +45,11 @@ class AppManager(private val context: Context) {
     }
 
     suspend fun checkAppStatus(packageId: String): AppStatus {
-        if(!canRequestPackageInstalls()) {
+        if (!canRequestPackageInstalls()) {
             return AppStatus.UNKNOWN
         }
 
-        return if(isAppInstalled(packageId)) {
+        return if (isAppInstalled(packageId)) {
             AppStatus.INSTALLED
         } else {
             AppStatus.UNINSTALLED
@@ -128,7 +128,7 @@ class AppManager(private val context: Context) {
         return withContext(Dispatchers.IO) {
             return@withContext packageManager.getInstalledApplications(0)
                 .mapNotNull {
-                    if(getInstallerPackageName(it.packageName) == appInstallerPackage) {
+                    if (getInstallerPackageName(it.packageName) == appInstallerPackage) {
                         it.packageName
                     } else {
                         null
