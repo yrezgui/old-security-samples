@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
+import android.content.pm.PackageInstaller.SessionInfo
 import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageManager
 import android.os.Build
@@ -74,23 +75,45 @@ class AppManager(private val context: Context) {
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun createInstallSession(appName: String): Int {
+    private suspend fun getInstallSessionsByPackage(packageName: String): List<SessionInfo> {
         return withContext(Dispatchers.IO) {
-            val params = SessionParams(SessionParams.MODE_FULL_INSTALL).apply {
-                setAppLabel(appName)
+            return@withContext packageInstaller.mySessions.filter {
+                // In some cases the originatingUid attached to a sessionInfo is -1 even though
+                // the installerPackageName is the current app. Android loses the originatingUid
+                // when the installer itself is uninstalled during a commit session
+                it.originatingUid == context.applicationInfo.uid &&
+                it.appPackageName == packageName
             }
-
-            if (BuildCompat.isAtLeastS()) {
-                params.setRequireUserAction(false)
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                params.setInstallReason(PackageManager.INSTALL_REASON_USER)
-            }
-
-            return@withContext packageInstaller.createSession(params)
         }
+    }
+
+    suspend fun getCurrentInstallSession(packageName: String): SessionInfo? {
+        return getInstallSessionsByPackage(packageName)
+            // We filter to only get sessions that haven't been closed
+            .filter { it.isActive }
+            // We're checking if there's at least one exisiting session
+            .maxByOrNull { it.updatedMillis }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun createInstallSession(appName: String) = withContext(Dispatchers.IO) {
+        val params = SessionParams(SessionParams.MODE_FULL_INSTALL).apply {
+            setAppLabel(appName)
+        }
+
+        if (BuildCompat.isAtLeastS()) {
+            params.setRequireUserAction(false)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            params.setInstallReason(PackageManager.INSTALL_REASON_USER)
+        }
+
+        return@withContext packageInstaller.createSession(params)
+    }
+
+    suspend fun getSessionInfo(sessionId: Int) = withContext(Dispatchers.IO) {
+        return@withContext packageInstaller.getSessionInfo(sessionId)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
