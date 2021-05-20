@@ -9,7 +9,7 @@
         android:id="@+id/navigation_store"
         android:name="com.samples.appinstaller.store.StoreFragment"
         android:label="@string/title_store"
-        tools:layout="@layout/fragment_store" >
+        tools:layout="@layout/fragment_store">
         <action
             android:id="@+id/action_navigation_store_to_navigation_app_details"
             app:destination="@id/navigation_app_details">
@@ -46,12 +46,12 @@
         tools:layout="@layout/fragment_app_details">
         <argument
             android:name="appName"
-            app:argType="string"
-            android:defaultValue="Racing Pro" />
+            android:defaultValue="Racing Pro"
+            app:argType="string" />
         <argument
             android:name="packageId"
-            app:argType="string"
-            android:defaultValue="com.example.game.racingpro" />
+            android:defaultValue="com.example.game.racingpro"
+            app:argType="string" />
     </fragment>
 
     <fragment
