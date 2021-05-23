@@ -25,7 +25,8 @@
                 android:layout_height="96dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                tools:src="@mipmap/ic_launcher" />
+                tools:src="@mipmap/ic_launcher"
+                android:contentDescription="@null" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
