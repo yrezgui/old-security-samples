@@ -8,10 +8,10 @@ data class AppPackage(
     val company: String,
     @DrawableRes val icon: Int,
     val isInstalled: Boolean = false,
-    val isUpdateAvailable: Boolean = false
+    val isUpdateAvailable: Boolean = false,
+    val status: AppStatus = AppStatus.UNINSTALLED
 )
 
-data class InstalledApp(
-    val app: AppPackage,
-    val isUpdateAvailable: Boolean = false
-)
+enum class AppStatus {
+    UNINSTALLED, INSTALLED, INSTALLING, UPGRADING
+}

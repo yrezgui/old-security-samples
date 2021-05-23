@@ -45,18 +45,6 @@ class AppManager(private val context: Context) {
         return getPackageInfo(packageId) != null
     }
 
-    suspend fun checkAppStatus(packageId: String): AppStatus {
-        if (!canRequestPackageInstalls()) {
-            return AppStatus.UNKNOWN
-        }
-
-        return if (isAppInstalled(packageId)) {
-            AppStatus.INSTALLED
-        } else {
-            AppStatus.UNINSTALLED
-        }
-    }
-
     fun uninstallApp(packageId: String) {
         val statusIntent = Intent(UNINSTALL_INTENT_NAME).apply {
             `package` = context.packageName
@@ -67,11 +55,30 @@ class AppManager(private val context: Context) {
     }
 
     @Suppress("DEPRECATION")
-    private fun canRequestPackageInstalls(): Boolean {
+    fun canRequestPackageInstalls(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             packageManager.canRequestPackageInstalls()
         } else {
             Settings.Global.getInt(null, Settings.Global.INSTALL_NON_MARKET_APPS, 0) == 1
+        }
+    }
+
+
+    suspend fun getActiveInstallSessionMap(): Map<Int, String> {
+        return withContext(Dispatchers.IO) {
+            return@withContext packageInstaller.mySessions
+                .filter {
+                    // In some cases the originatingUid attached to a sessionInfo is -1 even though
+                    // the installerPackageName is the current app. Android loses the originatingUid
+                    // when the installer itself is uninstalled during a commit session
+                    it.originatingUid == context.applicationInfo.uid
+                            && it.isActive
+                            && it.appPackageName.isNullOrEmpty()
+                }
+                .map {
+                    it.sessionId to it.appPackageName!!
+                }
+                .toMap()
         }
     }
 
@@ -82,7 +89,7 @@ class AppManager(private val context: Context) {
                 // the installerPackageName is the current app. Android loses the originatingUid
                 // when the installer itself is uninstalled during a commit session
                 it.originatingUid == context.applicationInfo.uid &&
-                it.appPackageName == packageName
+                        it.appPackageName == packageName
             }
         }
     }
@@ -116,8 +123,16 @@ class AppManager(private val context: Context) {
         return@withContext packageInstaller.getSessionInfo(sessionId)
     }
 
+    fun isSessionOwned(sessionInfo: SessionInfo?): Boolean {
+        sessionInfo?.let {
+            return it.installerPackageName == context.applicationInfo.packageName
+        }
+
+        return false
+    }
+
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun installApp(sessionId: Int, apkInputStream: InputStream) {
+    suspend fun writeAndCommitSession(sessionId: Int, apkInputStream: InputStream) {
         withContext(Dispatchers.IO) {
             val session = packageInstaller.openSession(sessionId)
 
@@ -174,24 +189,5 @@ class AppManager(private val context: Context) {
                 }
                 .toMap()
         }
-    }
-}
-
-enum class AppStatus {
-    UNKNOWN, UNINSTALLED, INSTALLED, DOWNLOADING, INSTALLING, UPGRADE
-}
-
-private val UnexpectedStatusValue = Exception("Status value is unexpected")
-
-fun getStatusFailureName(value: Int): String {
-    return when (value) {
-        PackageInstaller.STATUS_FAILURE -> "Failure"
-        PackageInstaller.STATUS_FAILURE_ABORTED -> "Aborted"
-        PackageInstaller.STATUS_FAILURE_BLOCKED -> "Blocked"
-        PackageInstaller.STATUS_FAILURE_CONFLICT -> "Conflict"
-        PackageInstaller.STATUS_FAILURE_INCOMPATIBLE -> "Incompatible"
-        PackageInstaller.STATUS_FAILURE_INVALID -> "Invalid"
-        PackageInstaller.STATUS_FAILURE_STORAGE -> "Storage Failure"
-        else -> throw UnexpectedStatusValue
     }
 }
