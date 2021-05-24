@@ -15,10 +15,10 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
-import com.samples.appinstaller.appManager.AppManager
-import com.samples.appinstaller.appManager.AppPackage
-import com.samples.appinstaller.appManager.AppStatus
-import com.samples.appinstaller.appManager.SampleStoreDB
+import com.samples.appinstaller.apps.AppManager
+import com.samples.appinstaller.apps.AppPackage
+import com.samples.appinstaller.apps.AppStatus
+import com.samples.appinstaller.apps.SampleStoreDB
 import com.samples.appinstaller.settings.appSettings
 import com.samples.appinstaller.settings.toDuration
 import com.samples.appinstaller.workers.EXTRA_PACKAGE_NAME_KEY
@@ -101,10 +101,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Start sync library job after cancelling existing one first
-     */
-    /**
-     * Sync app library and check if installed apps have updates
+     * Sync app library and check if apps have been installed since last sync
      */
     // We're merging our initial list of apps with entries from libraries where the installed
     // state is valid compared to the static data from SampleStoreDB
@@ -168,6 +165,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         appManager.uninstallApp(appId)
     }
 
+    /**
+     * Install app by creating an install session and write the app's apk in it.
+     *
+     * TODO: This method should be a WorkManager worker running in the foreground
+     */
     @Suppress("BlockingMethodInNonBlockingContext")
     fun installApp(appId: String, appName: String) {
         viewModelScope.launch {
@@ -176,7 +178,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 ?: return@launch
 
 
+            // We're updating the library entry to show a progress bar
             syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
+
+            // We fake a delay to show active work. This would be replaced by real APK download
             delay(5000L)
 
             appManager.writeAndCommitSession(

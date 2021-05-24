@@ -12,20 +12,26 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.samples.appinstaller.databinding.FragmentInstallerBinding
+import com.samples.appinstaller.databinding.FragmentLibraryBinding
+import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class InstallerFragment : Fragment() {
+class LibraryFragment : Fragment() {
     private val viewModel: AppViewModel by activityViewModels()
-    private lateinit var binding: FragmentInstallerBinding
+    private lateinit var binding: FragmentLibraryBinding
+
+    /**
+     * Timer to check sync app list happening every 30 seconds
+     */
+    val SYNC_TIMER = 3000L
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentInstallerBinding.inflate(inflater, container, false)
+        binding = FragmentLibraryBinding.inflate(inflater, container, false)
         setupUi(binding)
 
         return binding.root
@@ -40,10 +46,10 @@ class InstallerFragment : Fragment() {
         }
     }
 
-    private fun setupUi(binding: FragmentInstallerBinding) {
+    private fun setupUi(binding: FragmentLibraryBinding) {
         binding.showRationaleButton.setOnClickListener { showRationale() }
 
-        val adapter = InstallerRecyclerViewAdapter(
+        val adapter = LibraryRecyclerViewAdapter(
             list = emptyList(),
             timestamp = System.currentTimeMillis(),
             updateAvailabilityPeriod = viewModel.appSettings.value?.updateAvailabilityPeriod

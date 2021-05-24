@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_installer,
+                R.id.navigation_library,
                 R.id.navigation_settings
             )
         )

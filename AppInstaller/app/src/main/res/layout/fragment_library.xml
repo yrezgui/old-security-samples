@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:paddingHorizontal="16dp"
-                android:text="To be able to use the store, we need to request the install permission to add apps to your device"
+                android:text="@string/permission_description"
                 android:textAppearance="?attr/textAppearanceBody2" />
 
             <Button

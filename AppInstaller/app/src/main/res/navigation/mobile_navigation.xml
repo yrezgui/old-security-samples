@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_installer">
+    app:startDestination="@+id/navigation_library">
 
     <fragment
-        android:id="@+id/navigation_installer"
-        android:name="com.samples.appinstaller.InstallerFragment"
-        android:label="@string/title_store"
-        tools:layout="@layout/fragment_installer" />
+        android:id="@+id/navigation_library"
+        android:name="com.samples.appinstaller.LibraryFragment"
+        android:label="@string/title_library"
+        tools:layout="@layout/fragment_library" />
 
     <fragment
         android:id="@+id/navigation_settings"

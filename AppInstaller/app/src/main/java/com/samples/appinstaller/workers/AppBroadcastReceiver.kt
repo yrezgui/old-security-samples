@@ -13,12 +13,13 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.samples.appinstaller.R
-import com.samples.appinstaller.appManager.AppManager
-import com.samples.appinstaller.notificationManager.NotificationManager
+import com.samples.appinstaller.apps.AppManager
+import com.samples.appinstaller.NotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 const val EXTRA_SESSION_ID_KEY = "android.content.pm.extra.SESSION_ID"
 const val EXTRA_PACKAGE_NAME_KEY = "android.content.pm.extra.PACKAGE_NAME"
@@ -57,6 +58,8 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
     private fun handleInstallBroadcast(context: Context, status: Int, extras: Bundle) {
 
+        val sessionId = extras.getInt(EXTRA_SESSION_ID_KEY)
+
         when (status) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                 val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
@@ -75,7 +78,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     if (confirmIntent != null) {
                         showInstallNotification(
                             context = context,
-                            sessionId = extras.getInt(EXTRA_SESSION_ID_KEY),
+                            sessionId = sessionId,
                             confirmIntent = confirmIntent
                         )
                     }
@@ -90,11 +93,10 @@ class AppBroadcastReceiver : BroadcastReceiver() {
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
             PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                context.packageManager.packageInstaller.abandonSession(
-                    extras.getInt(
-                        EXTRA_SESSION_ID_KEY
-                    )
-                )
+                try {
+                    // If the app installer has been uninstalled
+                    context.packageManager.packageInstaller.abandonSession(sessionId)
+                } catch (e: Exception) {}
             }
         }
     }

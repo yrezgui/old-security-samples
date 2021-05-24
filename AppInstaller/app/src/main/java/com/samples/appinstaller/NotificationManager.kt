@@ -1,4 +1,4 @@
-package com.samples.appinstaller.notificationManager
+package com.samples.appinstaller
 
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_HIGH
@@ -8,7 +8,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.samples.appinstaller.R
 
 class NotificationManager(private val context: Context) {
     private val notificationManager: NotificationManagerCompat by lazy {

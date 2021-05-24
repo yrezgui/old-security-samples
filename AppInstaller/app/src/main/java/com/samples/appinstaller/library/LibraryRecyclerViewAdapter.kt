@@ -1,4 +1,4 @@
-package com.samples.appinstaller
+package com.samples.appinstaller.library
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +9,19 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.samples.appinstaller.appManager.AppPackage
-import com.samples.appinstaller.appManager.AppStatus
+import com.samples.appinstaller.AppSettings
+import com.samples.appinstaller.LibraryEntryActionListeners
+import com.samples.appinstaller.R
+import com.samples.appinstaller.apps.AppPackage
+import com.samples.appinstaller.apps.AppStatus
 
-class InstallerRecyclerViewAdapter(
+class LibraryRecyclerViewAdapter(
     private var list: List<AppPackage>,
     private var timestamp: Long,
     private var updateAvailabilityPeriod: AppSettings.UpdateAvailabilityPeriod,
     private val listeners: LibraryEntryActionListeners
 ) :
-    RecyclerView.Adapter<InstallerRecyclerViewAdapter.ViewHolder>() {
+    RecyclerView.Adapter<LibraryRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val appNameTextView: TextView = view.findViewById(R.id.app_name)

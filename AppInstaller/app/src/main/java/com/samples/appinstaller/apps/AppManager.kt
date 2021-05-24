@@ -1,4 +1,4 @@
-package com.samples.appinstaller.appManager
+package com.samples.appinstaller.apps
 
 import android.app.PendingIntent
 import android.content.Context
