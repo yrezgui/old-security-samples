@@ -34,13 +34,14 @@ class LibraryRecyclerViewAdapter(
         val installedSection: LinearLayout = view.findViewById(R.id.installed_section)
         val uninstallAppButton: Button = view.findViewById(R.id.uninstall_app_button)
         val openAppButton: Button = view.findViewById(R.id.open_app_button)
+        val cancelButton: Button = view.findViewById(R.id.cancel_button)
 
         var appPackage: AppPackage? = null
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.installer_list_item, viewGroup, false)
+            .inflate(R.layout.library_list_item, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -65,7 +66,7 @@ class LibraryRecyclerViewAdapter(
         viewHolder.openAppButton.setOnClickListener { listeners.openApp(app.id) }
         viewHolder.installAppButton.setOnClickListener { listeners.installApp(app.id, app.name) }
         viewHolder.uninstallAppButton.setOnClickListener { listeners.uninstallApp(app.id) }
-//        viewHolder.cancelButton.setOnClickListener { listeners.onOpen(app.id) }
+        viewHolder.cancelButton.setOnClickListener { listeners.cancelInstallApp(app.id) }
 //        viewHolder.upgradeAppButton.setOnClickListener { listeners.onOpen(app.id) }
     }
 

@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
 import kotlinx.coroutines.delay
@@ -41,6 +42,7 @@ class LibraryFragment : Fragment() {
         super.onResume()
         togglePermissionSection()
         viewLifecycleOwner.lifecycleScope.launch {
+            // FIXME: Remove this delay once we sync active install sessions
             delay(500L)
             viewModel.loadLibrary()
         }
@@ -61,6 +63,14 @@ class LibraryFragment : Fragment() {
 
                 override fun installApp(appId: String, appName: String) {
                     viewModel.installApp(appId, appName)
+                }
+
+                override fun cancelInstallApp(appId: String) {
+                    Snackbar.make(
+                        binding.root,
+                        R.string.feature_not_implemented,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
 
                 override fun upgradeApp(appId: String) {
@@ -122,6 +132,7 @@ class LibraryFragment : Fragment() {
 interface LibraryEntryActionListeners {
     fun openApp(appId: String)
     fun installApp(appId: String, appName: String)
+    fun cancelInstallApp(appId: String)
     fun upgradeApp(appId: String)
     fun uninstallApp(appId: String)
 }

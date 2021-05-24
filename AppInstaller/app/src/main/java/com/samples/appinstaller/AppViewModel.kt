@@ -103,12 +103,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Sync app library and check if apps have been installed since last sync
      */
-    // We're merging our initial list of apps with entries from libraries where the installed
-    // state is valid compared to the static data from SampleStoreDB
-    /**
-     * Timer to check sync app list happening every 30 seconds
-     */
-    val SYNC_TIMER = 3000L
     private fun syncLibrary(action: SyncAction) {
         val library = library.value ?: return
         val app = library[action.appId] ?: return

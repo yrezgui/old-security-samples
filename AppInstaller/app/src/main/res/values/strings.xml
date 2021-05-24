@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">App Installer</string>
     <string name="title_library">Demo Store</string>
     <string name="title_settings">Settings</string>
@@ -11,6 +11,7 @@
     <string name="open_app_install">Open</string>
     <string name="uninstall_label">Uninstall</string>
     <string name="update_available_status">&#9679; Update available</string>
+    <string name="feature_not_implemented">Feature not implemented yet</string>
 
     <string name="autoupdate_settings_description">DemoStore will update (or not) automatically apps it has installed based on these settings</string>
     <string name="auto_update_title">Auto-update Settings</string>
