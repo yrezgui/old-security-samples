@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private val appViewModel: AppViewModel by viewModels()
-    private val installerViewModel: InstallerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +34,6 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_installer,
-                R.id.navigation_store,
-                R.id.navigation_library,
                 R.id.navigation_settings
             )
         )
@@ -52,9 +49,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        packageManager.packageInstaller.registerSessionCallback(appViewModel.sessionCallback)
         registerReceiver(
-            installerViewModel.packageInstallCallback,
+            appViewModel.packageInstallCallback,
             IntentFilter().apply {
                 addAction(INSTALL_INTENT_NAME)
                 addAction(UNINSTALL_INTENT_NAME)
@@ -66,7 +62,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        packageManager.packageInstaller.registerSessionCallback(appViewModel.sessionCallback)
-        unregisterReceiver(installerViewModel.packageInstallCallback)
+        unregisterReceiver(appViewModel.packageInstallCallback)
     }
 }

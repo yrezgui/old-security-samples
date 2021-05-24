@@ -8,17 +8,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.findFragment
-import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.samples.appinstaller.AppViewModel
 import com.samples.appinstaller.R
 import com.samples.appinstaller.databinding.FragmentSettingsBinding
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlin.time.ExperimentalTime
 
-@ExperimentalTime
-@ExperimentalCoroutinesApi
 class SettingsFragment : Fragment() {
-    private val viewModel: SettingsViewModel by viewModels()
+    private val appViewModel: AppViewModel by activityViewModels()
     private lateinit var binding: FragmentSettingsBinding
 
     override fun onCreateView(
@@ -33,7 +29,7 @@ class SettingsFragment : Fragment() {
             false
         )
 
-        binding.viewmodel = viewModel
+        binding.viewModel = appViewModel
         binding.settingsHandler = SettingsHandler()
         binding.lifecycleOwner = this
 
@@ -47,7 +43,9 @@ class SettingsFragment : Fragment() {
             MaterialAlertDialogBuilder(context)
                 .setTitle(context.getString(R.string.auto_update_schedule_label))
                 .setItems(context.resources.getStringArray(R.array.auto_update_schedule)) { _, which ->
-                    view.findFragment<SettingsFragment>().viewModel.setAutoUpdateSchedule(which)
+                    view.findFragment<SettingsFragment>().appViewModel.setAutoUpdateSchedule(
+                        which
+                    )
                 }
                 .show()
         }
@@ -58,7 +56,9 @@ class SettingsFragment : Fragment() {
             MaterialAlertDialogBuilder(context)
                 .setTitle(context.getString(R.string.update_availability_period_label))
                 .setItems(context.resources.getStringArray(R.array.update_availability_period)) { _, which ->
-                    view.findFragment<SettingsFragment>().viewModel.setUpdateAvailabilityPeriod(which)
+                    view.findFragment<SettingsFragment>().appViewModel.setUpdateAvailabilityPeriod(
+                        which
+                    )
                 }
                 .show()
         }

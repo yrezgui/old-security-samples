@@ -17,7 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class InstallerFragment : Fragment() {
-    private val viewModel: InstallerViewModel by activityViewModels()
+    private val viewModel: AppViewModel by activityViewModels()
     private lateinit var binding: FragmentInstallerBinding
 
     override fun onCreateView(

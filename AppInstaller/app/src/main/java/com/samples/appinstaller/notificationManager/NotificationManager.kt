@@ -40,6 +40,5 @@ class NotificationManager(private val context: Context) {
             .setAutoCancel(true)
 
         notificationManager.notify(id, builder.build())
-
     }
 }

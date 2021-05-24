@@ -7,16 +7,6 @@
         android:title="@string/title_store" />
 
     <item
-        android:id="@+id/navigation_store"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="Removed" />
-
-    <item
-        android:id="@+id/navigation_library"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="@string/title_library" />
-
-    <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title="@string/title_settings" />

@@ -9,56 +9,7 @@
         android:id="@+id/navigation_installer"
         android:name="com.samples.appinstaller.InstallerFragment"
         android:label="@string/title_store"
-        tools:layout="@layout/fragment_installer"></fragment>
-
-    <fragment
-        android:id="@+id/navigation_store"
-        android:name="com.samples.appinstaller.store.StoreFragment"
-        android:label="@string/title_store"
-        tools:layout="@layout/fragment_store">
-        <action
-            android:id="@+id/action_navigation_store_to_navigation_app_details"
-            app:destination="@id/navigation_app_details">
-            <argument
-                android:name="appName"
-                app:argType="string" />
-            <argument
-                android:name="packageId"
-                app:argType="string" />
-        </action>
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_library"
-        android:name="com.samples.appinstaller.library.LibraryFragment"
-        android:label="@string/title_library"
-        tools:layout="@layout/fragment_library">
-        <action
-            android:id="@+id/action_navigation_library_to_navigation_app_details"
-            app:destination="@id/navigation_app_details">
-            <argument
-                android:name="appName"
-                app:argType="string" />
-            <argument
-                android:name="packageId"
-                app:argType="string" />
-        </action>
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_app_details"
-        android:name="com.samples.appinstaller.appDetails.AppDetailsFragment"
-        android:label="{appName}"
-        tools:layout="@layout/fragment_app_details">
-        <argument
-            android:name="appName"
-            android:defaultValue="Racing Pro"
-            app:argType="string" />
-        <argument
-            android:name="packageId"
-            android:defaultValue="com.example.game.racingpro"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/fragment_installer" />
 
     <fragment
         android:id="@+id/navigation_settings"

@@ -1,16 +1,18 @@
 package com.samples.appinstaller
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.pm.PackageInfo
+import android.content.Intent
 import android.content.pm.PackageInstaller
-import android.util.Log
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
 import com.samples.appinstaller.appManager.AppManager
@@ -18,22 +20,18 @@ import com.samples.appinstaller.appManager.AppPackage
 import com.samples.appinstaller.appManager.AppStatus
 import com.samples.appinstaller.appManager.SampleStoreDB
 import com.samples.appinstaller.settings.appSettings
-import com.samples.appinstaller.settings.toTemporalAmount
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import com.samples.appinstaller.settings.toDuration
+import com.samples.appinstaller.workers.EXTRA_PACKAGE_NAME_KEY
+import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UpgradeWorker
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.Duration
-import java.time.Instant
 
-/**
- * Timer to check sync app list happening every 30 seconds
- */
-const val SYNC_TIMER = 3000L
+typealias LibraryEntries = Map<String, AppPackage>
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
@@ -45,171 +43,147 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         get() = appManager.canRequestPackageInstalls()
 
     private val _appSettings = MutableLiveData(AppSettings.getDefaultInstance())
-    private val appSettings: LiveData<AppSettings> = _appSettings
+    val appSettings: LiveData<AppSettings> = _appSettings
 
-    private val _library = MutableLiveData<Map<String, AppPackage>>(emptyMap())
-    val library: LiveData<Map<String, AppPackage>> = _library
+    private val _library = MutableLiveData<LibraryEntries>(emptyMap())
+    val library: LiveData<LibraryEntries> = _library
 
-    val store: LiveData<Map<String, AppPackage>> = Transformations.map(library) {
-        // We're merging our initial list of apps with entries from libraries where the installed
-        // state is valid compared to the static data from SampleStoreDB
-        SampleStoreDB + it
-    }
+    private val syncChannel = Channel<SyncAction>()
 
-    private val _sessions = MutableLiveData<Map<Int, String>>(emptyMap())
-    val sessions: LiveData<Map<Int, String>> = _sessions
-
-    private var syncLibraryJob: Job = Job()
-
-    private val _selectedAppId: MutableLiveData<String?> = MutableLiveData()
-    val selectedApp = MediatorLiveData<AppPackage?>()
-
-    init {
-        viewModelScope.launch {
-            _appSettings.postValue(context.appSettings.data.first())
-            syncLibrary()
-            startSyncAppListJob()
-            initSelectedApp()
-
-            withContext(Dispatchers.IO) {
-                context.appSettings.data.collect {
-                    _appSettings.postValue(it)
-                    startSyncAppListJob()
-                }
-            }
-        }
-    }
-
-    private fun initSelectedApp() {
-        selectedApp.addSource(store) {
-            selectedApp.value = it[_selectedAppId.value]
-        }
-
-        selectedApp.addSource(_selectedAppId) {
-            selectedApp.value = store.value!![it]
-        }
-    }
-
-    fun selectApp(packageId: String) {
-        _selectedAppId.value = packageId
-    }
-
-    fun openApp() {
-        selectedApp.value?.let { appManager.openApp(it.id) }
-    }
-
-    fun uninstallApp() {
-        viewModelScope.launch {
-            selectedApp.value?.let { appManager.uninstallApp(it.id) }
-        }
-    }
-
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun installApp() {
-        val app = selectedApp.value ?: return
-
-        viewModelScope.launch {
-            val sessionInfo = appManager.getCurrentInstallSession(app.id)
-                ?: appManager.getSessionInfo(appManager.createInstallSession(app.name, app.id))
-                ?: return@launch
-
-            delay(5000L)
-
-            withContext(Dispatchers.IO) {
-                appManager.writeAndCommitSession(
-                    sessionId = sessionInfo.sessionId,
-                    apkInputStream = context.assets.open("${app.id}.apk")
+    val autoUpdateSchedule = context.appSettings.data.mapLatest { settings ->
+        when (settings.autoUpdateSchedule) {
+            AutoUpdateSchedule.MANUAL -> context.getString(R.string.auto_update_disabled)
+            else -> {
+                context.resources.getString(
+                    R.string.auto_update_schedule,
+                    settings.autoUpdateSchedule.toDuration().toMinutes()
                 )
             }
         }
+    }.asLiveData()
+
+    val updateAvailabilityPeriod = context.appSettings.data.mapLatest { settings ->
+        when (settings.updateAvailabilityPeriod) {
+            UpdateAvailabilityPeriod.NONE -> context.getString(R.string.update_availability_disabled)
+            UpdateAvailabilityPeriod.AFTER_30_SECONDS -> {
+                context.resources.getString(
+                    R.string.update_availability_seconds_period,
+                    settings.updateAvailabilityPeriod.toDuration().seconds
+                )
+            }
+            else -> {
+                context.resources.getString(
+                    R.string.update_availability_minutes_period,
+                    settings.updateAvailabilityPeriod.toDuration().toMinutes()
+                )
+            }
+        }
+    }.asLiveData()
+
+    init {
+        viewModelScope.launch {
+            loadLibrary()
+            syncChannel.consumeEach(::syncLibrary)
+        }
+    }
+
+    suspend fun loadLibrary() {
+        val updatedLibrary = appManager.getInstalledPackageMap()
+            .filterKeys { SampleStoreDB.containsKey(it) }
+            .mapValues {
+                SampleStoreDB[it.key]!!.copy(
+                    status = AppStatus.INSTALLED,
+                    lastUpdateTime = it.value.lastUpdateTime
+                )
+            }
+
+        _library.value = SampleStoreDB + updatedLibrary
     }
 
     /**
      * Start sync library job after cancelling existing one first
      */
-    private fun startSyncAppListJob() {
-        viewModelScope.launch {
-            syncLibraryJob.cancel()
-            syncLibraryJob = viewModelScope.launch {
-                while (isActive) {
-                    syncLibrary()
-                    delay(SYNC_TIMER)
-                }
-            }
-        }
-    }
-
     /**
      * Sync app library and check if installed apps have updates
      */
-    private suspend fun syncLibrary() {
-        withContext(Dispatchers.Default) {
-            val settings = appSettings.value ?: AppSettings.getDefaultInstance()
-            val installedPackages = appManager.getInstalledPackageMap()
-            val sessions = _sessions.value ?: appManager.getActiveInstallSessionMap()
+    // We're merging our initial list of apps with entries from libraries where the installed
+    // state is valid compared to the static data from SampleStoreDB
+    /**
+     * Timer to check sync app list happening every 30 seconds
+     */
+    val SYNC_TIMER = 3000L
+    private fun syncLibrary(action: SyncAction) {
+        val library = library.value ?: return
+        val app = library[action.appId] ?: return
 
-            val installedApps = installedPackages
-                .filterKeys { SampleStoreDB.containsKey(it) }
-                .mapValues {
-                    val storePackage = SampleStoreDB[it.key]!!.copy(status = AppStatus.INSTALLED)
+        val updatedLibrary = mapOf(
+            when (action.type) {
+                SyncType.INSTALLING -> app.id to app.copy(status = AppStatus.INSTALLING)
+                SyncType.INSTALL_SUCCESS -> app.id to app.copy(status = AppStatus.INSTALLED)
+                SyncType.INSTALL_FAILURE -> app.id to app.copy(status = AppStatus.UNINSTALLED)
+                SyncType.UNINSTALL_SUCCESS -> app.id to app.copy(status = AppStatus.UNINSTALLED)
+                SyncType.UNINSTALL_FAILURE -> app.id to app.copy(status = AppStatus.INSTALLED)
+            }
+        )
 
-                    if (settings.updateAvailabilityPeriod == UpdateAvailabilityPeriod.NONE) {
-                        // If the user has disabled updates or the app is currently upgrading,
-                        // we don't update the store
-                        storePackage
-                    } else {
-                        // We check if the installed time is older than the UpdateAvailabilityPeriod
-                        storePackage.copy(
-                            isUpdateAvailable = checkIfUpdateIsAvailable(
-                                app = storePackage,
-                                packageInfo = it.value
-                            )
-                        )
-                    }
-                }
-
-            val appsBeingInstalled = sessions
-                .filterValues { SampleStoreDB.containsKey(it) }
-                .mapKeys { (_, packageName) -> packageName }
-                .mapValues { (packageName, _) ->
-                    val app = installedApps[packageName] ?: SampleStoreDB[packageName]!!
-
-                    when (app.status) {
-                        AppStatus.INSTALLED -> app.copy(status = AppStatus.UPGRADING)
-                        AppStatus.UNINSTALLED -> app.copy(status = AppStatus.INSTALLING)
-                        else -> app
-                    }
-                }
-
-            val updatedLibrary = installedApps + appsBeingInstalled
-            _library.postValue(updatedLibrary)
-        }
+        _library.value = library + updatedLibrary
     }
 
     /**
      * Check if the installed time of a package is older than the UpdateAvailabilityPeriod setting
      */
-    private fun checkIfUpdateIsAvailable(app: AppPackage, packageInfo: PackageInfo): Boolean {
-        val now = Instant.now()
+//    private fun checkIfUpdateIsAvailable(app: AppPackage, packageInfo: PackageInfo): Boolean {
+//        val now = Instant.now()
+//
+//        val settings = appSettings.value ?: return false
+//        val updateAvailabilityPeriod = settings.updateAvailabilityPeriod.toTemporalAmount()
+//
+//        if (app.status != AppStatus.INSTALLED) {
+//            return false
+//        }
+//
+//        val between = Duration.between(Instant.ofEpochMilli(packageInfo.lastUpdateTime), now)
+//
+//        val after = now.isAfter(
+//            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
+//        )
+//
+//        Log.d("syncAppList", "${app.id}: ${between.toMillis() / 1000}s  After: $after")
+//
+//        return now.isAfter(
+//            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
+//        )
+//    }
 
-        val settings = appSettings.value ?: return false
-        val updateAvailabilityPeriod = settings.updateAvailabilityPeriod.toTemporalAmount()
+    fun triggerAutoUpdating(@Suppress("UNUSED_PARAMETER") view: View) {
+        val upgradeWorkRequest = OneTimeWorkRequestBuilder<UpgradeWorker>().build()
+        WorkManager.getInstance(context).enqueue(upgradeWorkRequest)
+    }
 
-        if (app.status != AppStatus.INSTALLED) {
-            return false
+    fun openApp(appId: String) {
+        appManager.openApp(appId)
+    }
+
+    fun uninstallApp(appId: String) {
+        appManager.uninstallApp(appId)
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun installApp(appId: String, appName: String) {
+        viewModelScope.launch {
+            val sessionInfo = appManager.getCurrentInstallSession(appId)
+                ?: appManager.getSessionInfo(appManager.createInstallSession(appName, appId))
+                ?: return@launch
+
+
+            syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
+            delay(5000L)
+
+            appManager.writeAndCommitSession(
+                sessionId = sessionInfo.sessionId,
+                apkInputStream = context.assets.open("${appId}.apk")
+            )
         }
-
-        val between = Duration.between(Instant.ofEpochMilli(packageInfo.lastUpdateTime), now)
-
-        val after = now.isAfter(
-            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
-        )
-
-        Log.d("syncAppList", "${app.id}: ${between.toMillis() / 1000}s  After: $after")
-
-        return now.isAfter(
-            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
-        )
     }
 
     /**
@@ -238,106 +212,61 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun getAppBySessionId(sessionId: Int): AppPackage? {
-        val sessionInfo = appManager.getSessionInfo(sessionId) ?: return null
-        val packageName = sessionInfo.appPackageName ?: return null
-        if (!appManager.isSessionOwned(sessionInfo)) return null
-        return _library.value?.get(packageName) ?: SampleStoreDB[packageName]
-    }
-
     /**
      * Monitor install sessions progress
      */
-    val sessionCallback = object : PackageInstaller.SessionCallback() {
-        override fun onCreated(sessionId: Int) {
+    val packageInstallCallback = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            val action = intent.action
+            val status = intent.extras?.getInt(PackageInstaller.EXTRA_STATUS) ?: return
+            val appId = intent.extras?.getString(EXTRA_PACKAGE_NAME_KEY) ?: return
+
             viewModelScope.launch {
-                withContext(Dispatchers.Default) {
-                    val app = getAppBySessionId(sessionId) ?: return@withContext
-
-                    // We update the list of current sessions
-                    val sessions = _sessions.value?.toMutableMap() ?: mutableMapOf()
-                    sessions[sessionId] = app.id
-                    _sessions.postValue(_sessions.value)
-
-                    val status = if (app.status == AppStatus.INSTALLED) {
-                        AppStatus.UPGRADING
-                    } else {
-                        AppStatus.INSTALLING
-                    }
-
-                    val library = _library.value?.toMutableMap() ?: mutableMapOf()
-                    library[app.id] = app.copy(status = status)
-                    _library.postValue(library.toMap())
+                when (action) {
+                    INSTALL_INTENT_NAME -> onInstall(status, appId)
+                    UNINSTALL_INTENT_NAME -> onUninstall(status, appId)
                 }
             }
         }
 
-        override fun onBadgingChanged(sessionId: Int) {}
-
-        override fun onActiveChanged(sessionId: Int, active: Boolean) {
-            viewModelScope.launch {
-                withContext(Dispatchers.Default) {
-                    var app = getAppBySessionId(sessionId) ?: return@withContext
-                    val sessions = _sessions.value?.toMutableMap() ?: mutableMapOf()
-
-                    if (active) {
-                        // As the session is now active, it may have been removed previously, so we add it
-                        // back the list of monitored sessions
-                        sessions[sessionId] = app.id
-                        app = app.copy(
-                            status = if (app.status == AppStatus.INSTALLED) {
-                                AppStatus.UPGRADING
-                            } else {
-                                AppStatus.INSTALLING
-                            }
-                        )
-                    } else {
-                        // As the session isn't active anymore, we remove it from the list of monitored
-                        // sessions
-                        sessions.remove(sessionId)
-                        val isAppInstalled = appManager.getPackageInfo(app.id) != null
-                        app = app.copy(
-                            status = if (isAppInstalled) {
-                                AppStatus.INSTALLED
-                            } else {
-                                AppStatus.UNINSTALLED
-                            }
-                        )
-                    }
-
-                    val library = _library.value?.toMutableMap() ?: mutableMapOf()
-                    library[app.id] = app
-                    _library.postValue(library.toMap())
-                    _sessions.postValue(sessions.toMap())
+        suspend fun onInstall(status: Int, appId: String) {
+            when (status) {
+                PackageInstaller.STATUS_SUCCESS -> {
+                    syncChannel.send(SyncAction(SyncType.INSTALL_SUCCESS, appId))
+                }
+                PackageInstaller.STATUS_FAILURE,
+                PackageInstaller.STATUS_FAILURE_ABORTED,
+                PackageInstaller.STATUS_FAILURE_BLOCKED,
+                PackageInstaller.STATUS_FAILURE_CONFLICT,
+                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+                PackageInstaller.STATUS_FAILURE_INVALID,
+                PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                    syncChannel.send(SyncAction(SyncType.INSTALL_FAILURE, appId))
                 }
             }
         }
 
-        override fun onProgressChanged(sessionId: Int, progress: Float) {}
-
-        override fun onFinished(sessionId: Int, success: Boolean) {
-            viewModelScope.launch {
-                withContext(Dispatchers.Default) {
-                    var app = getAppBySessionId(sessionId) ?: return@withContext
-                    val sessions = _sessions.value?.toMutableMap() ?: mutableMapOf()
-
-                    val isAppInstalled = appManager.getPackageInfo(app.id) != null
-                    app = app.copy(
-                        isUpdateAvailable = false,
-                        status = if (isAppInstalled) {
-                            AppStatus.INSTALLED
-                        } else {
-                            AppStatus.UNINSTALLED
-                        }
-                    )
-
-                    val library = _library.value?.toMutableMap() ?: mutableMapOf()
-                    library[app.id] = app
-                    _library.postValue(library.toMap())
-                    sessions.remove(sessionId)
-                    _sessions.postValue(sessions.toMap())
+        suspend fun onUninstall(status: Int, appId: String) {
+            when (status) {
+                PackageInstaller.STATUS_SUCCESS -> {
+                    syncChannel.send(SyncAction(SyncType.UNINSTALL_SUCCESS, appId))
+                }
+                PackageInstaller.STATUS_FAILURE,
+                PackageInstaller.STATUS_FAILURE_ABORTED,
+                PackageInstaller.STATUS_FAILURE_BLOCKED,
+                PackageInstaller.STATUS_FAILURE_CONFLICT,
+                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+                PackageInstaller.STATUS_FAILURE_INVALID,
+                PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                    syncChannel.send(SyncAction(SyncType.UNINSTALL_FAILURE, appId))
                 }
             }
         }
     }
 }
+
+enum class SyncType {
+    INSTALLING, INSTALL_SUCCESS, INSTALL_FAILURE, UNINSTALL_SUCCESS, UNINSTALL_FAILURE
+}
+
+data class SyncAction(val type: SyncType, val appId: String)

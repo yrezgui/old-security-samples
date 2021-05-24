@@ -3,9 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
-            name="viewmodel"
-            type="com.samples.appinstaller.settings.SettingsViewModel" />
+            name="viewModel"
+            type="com.samples.appinstaller.AppViewModel" />
 
         <variable
             name="settingsHandler"
@@ -53,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="@{viewmodel.autoUpdateSchedule.toString()}"
+                android:text="@{viewModel.autoUpdateSchedule}"
                 android:textAppearance="?attr/textAppearanceCaption"
                 tools:text="Check and update every minute" />
         </LinearLayout>
@@ -76,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="30dp"
-                android:text="@{viewmodel.updateAvailabilityPeriod.toString()}"
+                android:text="@{viewModel.updateAvailabilityPeriod}"
                 android:textAppearance="?attr/textAppearanceCaption"
                 tools:text="Updates available one minute after install" />
         </LinearLayout>
@@ -84,7 +85,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/trigger_auto_updates_manually_label"
-            android:onClick="@{viewmodel::triggerAutoUpdating}"/>
+            android:onClick="@{viewModel::triggerAutoUpdating}"
+            android:text="@string/trigger_auto_updates_manually_label" />
     </LinearLayout>
 </layout>
