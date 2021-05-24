@@ -34,6 +34,7 @@ class LibraryRecyclerViewAdapter(
         val installProgressBar: ProgressBar = view.findViewById(R.id.install_progress_bar)
         val installedSection: LinearLayout = view.findViewById(R.id.installed_section)
         val uninstallAppButton: Button = view.findViewById(R.id.uninstall_app_button)
+        val upgradeAppButton: Button = view.findViewById(R.id.upgrade_app_button)
         val openAppButton: Button = view.findViewById(R.id.open_app_button)
         val cancelButton: Button = view.findViewById(R.id.cancel_button)
 
@@ -62,31 +63,43 @@ class LibraryRecyclerViewAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val app = list[position]
+        val isUpdateAvailable = isUpdateAvailable(app.lastUpdateTime)
+
         viewHolder.appPackage = app
         viewHolder.appNameTextView.text = app.name
         viewHolder.companyTextView.text = app.company
         viewHolder.iconImageView.setImageResource(app.icon)
-        viewHolder.statusTextView.text =
-            if (isUpdateAvailable(app.lastUpdateTime)) {
-                viewHolder.itemView.context.getString(R.string.update_available_status)
-            } else {
-                app.status.toString()
-            }
+        viewHolder.statusTextView.text = if (isUpdateAvailable) {
+            viewHolder.itemView.context.getString(R.string.update_available_status)
+        } else {
+            app.status.toString()
+        }
 
         viewHolder.installAppButton.visibility =
             if (app.status === AppStatus.UNINSTALLED) View.VISIBLE else View.GONE
+
         viewHolder.installingSection.visibility =
             if (app.status === AppStatus.INSTALLING) View.VISIBLE else View.GONE
+
         viewHolder.installProgressBar.visibility =
             if (app.status === AppStatus.INSTALLING) View.VISIBLE else View.GONE
+
         viewHolder.installedSection.visibility =
             if (app.status === AppStatus.INSTALLED) View.VISIBLE else View.GONE
+
+        if (isUpdateAvailable) {
+            viewHolder.upgradeAppButton.visibility = View.VISIBLE
+            viewHolder.uninstallAppButton.visibility = View.GONE
+        } else {
+            viewHolder.upgradeAppButton.visibility = View.GONE
+            viewHolder.uninstallAppButton.visibility = View.VISIBLE
+        }
 
         viewHolder.openAppButton.setOnClickListener { listeners.openApp(app.id) }
         viewHolder.installAppButton.setOnClickListener { listeners.installApp(app.id, app.name) }
         viewHolder.uninstallAppButton.setOnClickListener { listeners.uninstallApp(app.id) }
         viewHolder.cancelButton.setOnClickListener { listeners.cancelInstallApp(app.id) }
-//        viewHolder.upgradeAppButton.setOnClickListener { listeners.onOpen(app.id) }
+        viewHolder.upgradeAppButton.setOnClickListener { listeners.upgradeApp(app.id, app.name) }
     }
 
     override fun getItemCount() = list.size

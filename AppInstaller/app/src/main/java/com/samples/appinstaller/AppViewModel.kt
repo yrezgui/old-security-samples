@@ -109,7 +109,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val updatedLibrary = mapOf(
             when (action.type) {
                 SyncType.INSTALLING -> app.id to app.copy(status = AppStatus.INSTALLING)
-                SyncType.INSTALL_SUCCESS -> app.id to app.copy(status = AppStatus.INSTALLED)
+                SyncType.INSTALL_SUCCESS -> app.id to app.copy(
+                    status = AppStatus.INSTALLED,
+                    lastUpdateTime = System.currentTimeMillis()
+                )
                 SyncType.INSTALL_FAILURE -> app.id to app.copy(status = AppStatus.UNINSTALLED)
                 SyncType.UNINSTALL_SUCCESS -> app.id to app.copy(status = AppStatus.UNINSTALLED)
                 SyncType.UNINSTALL_FAILURE -> app.id to app.copy(status = AppStatus.INSTALLED)
@@ -149,11 +152,40 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
 
             // We fake a delay to show active work. This would be replaced by real APK download
-            delay(5000L)
+            delay(3000L)
 
             appManager.writeAndCommitSession(
                 sessionId = sessionInfo.sessionId,
-                apkInputStream = context.assets.open("${appId}.apk")
+                apkInputStream = context.assets.open("${appId}.apk"),
+                isUpgrade = false
+            )
+        }
+    }
+
+    /**
+     * Upgrade app by creating an install session with a different intent filter from the normal
+     * install flow and write the app's apk in it
+     *
+     * TODO: This method should be a WorkManager worker running in the foreground
+     */
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun upgradeApp(appId: String, appName: String) {
+        viewModelScope.launch {
+            val sessionInfo = appManager.getCurrentInstallSession(appId)
+                ?: appManager.getSessionInfo(appManager.createInstallSession(appName, appId))
+                ?: return@launch
+
+
+            // We're updating the library entry to show a progress bar
+            syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
+
+            // We fake a delay to show active work. This would be replaced by real APK download
+            delay(3000L)
+
+            appManager.writeAndCommitSession(
+                sessionId = sessionInfo.sessionId,
+                apkInputStream = context.assets.open("${appId}.apk"),
+                isUpgrade = true
             )
         }
     }

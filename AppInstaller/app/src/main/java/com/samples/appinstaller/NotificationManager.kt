@@ -23,7 +23,7 @@ class NotificationManager(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
-    fun createAndShowNotification(
+    fun notify(
         id: Int,
         title: String,
         description: String,

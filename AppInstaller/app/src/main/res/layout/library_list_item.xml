@@ -100,13 +100,6 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/install_progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
-
         <LinearLayout
             android:id="@+id/installed_section"
             android:layout_width="match_parent"
@@ -119,6 +112,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/uninstall_label" />
+
+            <Button
+                android:id="@+id/upgrade_app_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/upgrade_label" />
 
             <Space
                 android:layout_width="20dp"
@@ -133,6 +133,13 @@
                 android:text="@string/open_app_install" />
 
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/install_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
     </LinearLayout>
 
     <View

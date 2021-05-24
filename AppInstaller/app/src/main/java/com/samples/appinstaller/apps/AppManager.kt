@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.BuildCompat
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -41,10 +42,6 @@ class AppManager(private val context: Context) {
         }
     }
 
-    private suspend fun isAppInstalled(packageId: String): Boolean {
-        return getPackageInfo(packageId) != null
-    }
-
     fun uninstallApp(packageId: String) {
         val statusIntent = Intent(UNINSTALL_INTENT_NAME).apply {
             `package` = context.packageName
@@ -60,25 +57,6 @@ class AppManager(private val context: Context) {
             packageManager.canRequestPackageInstalls()
         } else {
             Settings.Global.getInt(null, Settings.Global.INSTALL_NON_MARKET_APPS, 0) == 1
-        }
-    }
-
-
-    suspend fun getActiveInstallSessionMap(): Map<Int, String> {
-        return withContext(Dispatchers.IO) {
-            return@withContext packageInstaller.mySessions
-                .filter {
-                    // In some cases the originatingUid attached to a sessionInfo is -1 even though
-                    // the installerPackageName is the current app. Android loses the originatingUid
-                    // when the installer itself is uninstalled during a commit session
-                    it.originatingUid == context.applicationInfo.uid
-                            && it.isActive
-                            && it.appPackageName.isNullOrEmpty()
-                }
-                .map {
-                    it.sessionId to it.appPackageName!!
-                }
-                .toMap()
         }
     }
 
@@ -125,16 +103,12 @@ class AppManager(private val context: Context) {
         return@withContext packageInstaller.getSessionInfo(sessionId)
     }
 
-    fun isSessionOwned(sessionInfo: SessionInfo?): Boolean {
-        sessionInfo?.let {
-            return it.installerPackageName == context.applicationInfo.packageName
-        }
-
-        return false
-    }
-
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun writeAndCommitSession(sessionId: Int, apkInputStream: InputStream) {
+    suspend fun writeAndCommitSession(
+        sessionId: Int,
+        apkInputStream: InputStream,
+        isUpgrade: Boolean
+    ) {
         withContext(Dispatchers.IO) {
             val session = packageInstaller.openSession(sessionId)
 
@@ -142,8 +116,14 @@ class AppManager(private val context: Context) {
                 apkInputStream.copyTo(destination)
             }
 
-            val statusIntent = Intent(INSTALL_INTENT_NAME).apply {
-                setPackage(context.packageName)
+            val statusIntent = if (isUpgrade) {
+                Intent(UPGRADE_INTENT_NAME).apply {
+                    setPackage(context.packageName)
+                }
+            } else {
+                Intent(INSTALL_INTENT_NAME).apply {
+                    setPackage(context.packageName)
+                }
             }
 
             val statusPendingIntent = PendingIntent.getBroadcast(context, 0, statusIntent, 0)
@@ -159,21 +139,6 @@ class AppManager(private val context: Context) {
             } else {
                 packageManager.getInstallerPackageName(packageName)
             }
-        }
-    }
-
-    suspend fun getInstalledApps(): List<String> {
-        val appInstallerPackage = context.packageName
-
-        return withContext(Dispatchers.IO) {
-            return@withContext packageManager.getInstalledApplications(0)
-                .mapNotNull {
-                    if (getInstallerPackageName(it.packageName) == appInstallerPackage) {
-                        it.packageName
-                    } else {
-                        null
-                    }
-                }
         }
     }
 

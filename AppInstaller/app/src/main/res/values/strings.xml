@@ -10,6 +10,7 @@
     <string name="cancel_install_label">Cancel</string>
     <string name="open_app_install">Open</string>
     <string name="uninstall_label">Uninstall</string>
+    <string name="upgrade_label">Upgrade</string>
     <string name="update_available_status">&#9679; Update available</string>
     <string name="feature_not_implemented">Feature not implemented yet</string>
 
@@ -36,9 +37,9 @@
     <string name="uninstall_notification_title">Uninstall app</string>
     <string name="uninstall_notification_description">Click here to uninstall the app %s</string>
 
-    <string name="update_notification_channel">Update app</string>
-    <string name="update_notification_title">Update app</string>
-    <string name="update_notification_description">Click here to update the app %s</string>
-    <string name="multiple_updates_notification_title">Update app</string>
-    <string name="multiple_updates_notification_description">Check out these %s app updates</string>
+    <string name="upgrade_notification_channel">Upgrade app</string>
+    <string name="upgrade_notification_title">Upgrade app</string>
+    <string name="upgrade_notification_description">Click here to upgrade the app %s</string>
+    <string name="multiple_updates_notification_title">Upgrade apps</string>
+    <string name="multiple_updates_notification_description">Check out these %s app upgrades</string>
 </resources>

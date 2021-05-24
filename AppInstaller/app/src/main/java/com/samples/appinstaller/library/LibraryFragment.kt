@@ -15,11 +15,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
-import com.samples.appinstaller.settings.appSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -31,7 +29,7 @@ class LibraryFragment : Fragment() {
     /**
      * Timer to check updates availability
      */
-    val SYNC_TIMER = 3000L
+    private val SYNC_TIMER = 30000L
     private var checkUpdatesJob: Job = Job()
 
     override fun onCreateView(
@@ -49,7 +47,7 @@ class LibraryFragment : Fragment() {
         super.onResume()
         togglePermissionSection()
         viewLifecycleOwner.lifecycleScope.launch {
-            // FIXME: Remove this delay once we sync active install sessions
+            // TODO: Remove this delay once we sync active install sessions
             delay(500L)
             viewModel.loadLibrary()
             startCheckUpdatesJob(this)
@@ -91,8 +89,8 @@ class LibraryFragment : Fragment() {
                     ).show()
                 }
 
-                override fun upgradeApp(appId: String) {
-                    TODO("Not yet implemented")
+                override fun upgradeApp(appId: String, appName: String) {
+                    viewModel.upgradeApp(appId, appName)
                 }
 
                 override fun uninstallApp(appId: String) {
@@ -154,6 +152,6 @@ interface LibraryEntryActionListeners {
     fun openApp(appId: String)
     fun installApp(appId: String, appName: String)
     fun cancelInstallApp(appId: String)
-    fun upgradeApp(appId: String)
+    fun upgradeApp(appId: String, appName: String)
     fun uninstallApp(appId: String)
 }
