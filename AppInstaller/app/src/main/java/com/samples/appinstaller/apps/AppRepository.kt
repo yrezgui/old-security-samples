@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 
-class AppManager(private val context: Context) {
+class AppRepository(private val context: Context) {
     private val packageManager: PackageManager
         get() = context.packageManager
 

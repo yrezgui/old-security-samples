@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
-import com.samples.appinstaller.apps.AppManager
+import com.samples.appinstaller.apps.AppRepository
 import com.samples.appinstaller.settings.appSettings
 import com.samples.appinstaller.settings.toDuration
 import kotlinx.coroutines.coroutineScope
@@ -17,7 +17,7 @@ const val UPGRADE_WORKER_TAG = "upgrade"
 
 class UpgradeWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
-    private val appManager = AppManager(applicationContext)
+    private val appManager = AppRepository(applicationContext)
 
     override suspend fun doWork(): Result = coroutineScope {
         Log.d("UpgradeWorker", "Work is happening in the background")

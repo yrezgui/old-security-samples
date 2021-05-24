@@ -16,7 +16,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
-import com.samples.appinstaller.apps.AppManager
+import com.samples.appinstaller.apps.AppRepository
 import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.apps.AppStatus
 import com.samples.appinstaller.apps.SampleStoreDB
@@ -39,10 +39,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
         get() = getApplication()
 
-    private val appManager: AppManager by lazy { AppManager(context) }
+    private val appRepository: AppRepository by lazy { AppRepository(context) }
 
     val isPermissionGranted: Boolean
-        get() = appManager.canRequestPackageInstalls()
+        get() = appRepository.canRequestPackageInstalls()
 
     val appSettings: LiveData<AppSettings> = context.appSettings.data.asLiveData()
 
@@ -89,7 +89,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun loadLibrary() {
-        val updatedLibrary = appManager.getInstalledPackageMap()
+        val updatedLibrary = appRepository.getInstalledPackageMap()
             .filterKeys { SampleStoreDB.containsKey(it) }
             .mapValues {
                 SampleStoreDB[it.key]!!.copy(
@@ -125,11 +125,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun openApp(appId: String) {
-        appManager.openApp(appId)
+        appRepository.openApp(appId)
     }
 
     fun uninstallApp(appId: String) {
-        appManager.uninstallApp(appId)
+        appRepository.uninstallApp(appId)
     }
 
     /**
@@ -140,8 +140,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     @Suppress("BlockingMethodInNonBlockingContext")
     fun installApp(appId: String, appName: String) {
         viewModelScope.launch {
-            val sessionInfo = appManager.getCurrentInstallSession(appId)
-                ?: appManager.getSessionInfo(appManager.createInstallSession(appName, appId))
+            val sessionInfo = appRepository.getCurrentInstallSession(appId)
+                ?: appRepository.getSessionInfo(appRepository.createInstallSession(appName, appId))
                 ?: return@launch
 
 
@@ -151,7 +151,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             // We fake a delay to show active work. This would be replaced by real APK download
             delay(3000L)
 
-            appManager.writeAndCommitSession(
+            appRepository.writeAndCommitSession(
                 sessionId = sessionInfo.sessionId,
                 apkInputStream = context.assets.open("${appId}.apk"),
                 isUpgrade = false
@@ -168,8 +168,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     @Suppress("BlockingMethodInNonBlockingContext")
     fun upgradeApp(appId: String, appName: String) {
         viewModelScope.launch {
-            val sessionInfo = appManager.getCurrentInstallSession(appId)
-                ?: appManager.getSessionInfo(appManager.createInstallSession(appName, appId))
+            val sessionInfo = appRepository.getCurrentInstallSession(appId)
+                ?: appRepository.getSessionInfo(appRepository.createInstallSession(appName, appId))
                 ?: return@launch
 
 
@@ -179,7 +179,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             // We fake a delay to show active work. This would be replaced by real APK download
             delay(3000L)
 
-            appManager.writeAndCommitSession(
+            appRepository.writeAndCommitSession(
                 sessionId = sessionInfo.sessionId,
                 apkInputStream = context.assets.open("${appId}.apk"),
                 isUpgrade = true

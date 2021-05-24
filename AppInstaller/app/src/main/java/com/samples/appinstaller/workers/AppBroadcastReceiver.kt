@@ -12,9 +12,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.samples.appinstaller.NotificationManager
+import com.samples.appinstaller.NotificationRepository
 import com.samples.appinstaller.R
-import com.samples.appinstaller.apps.AppManager
+import com.samples.appinstaller.apps.AppRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,14 +29,17 @@ const val SEND_INSTALL_UPDATES_PERMISSION =
 const val INSTALL_INTENT_NAME = "appinstaller_install_status"
 const val INSTALL_CHANNEL_ID = "install"
 const val INSTALL_NOTIFICATION_ID = 1
+const val INSTALL_NOTIFICATION_TAG = "install"
 
 const val UNINSTALL_INTENT_NAME = "appinstaller_uninstall_status"
 const val UNINSTALL_CHANNEL_ID = "uninstall"
 const val UNINSTALL_NOTIFICATION_ID = 2
+const val UNINSTALL_NOTIFICATION_TAG = "uninstall"
 
 const val UPGRADE_INTENT_NAME = "appinstaller_upgrade_status"
 const val UPGRADE_CHANNEL_ID = "upgrade"
 const val UPGRADE_NOTIFICATION_ID = 3
+const val UPGRADE_SINGLE_NOTIFICATION_TAG = "upgrade_single_app"
 
 class AppBroadcastReceiver : BroadcastReceiver() {
 
@@ -114,7 +117,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         createInstallNotificationChannel(context)
 
         context.packageManager.packageInstaller.getSessionInfo(sessionId)?.let { sessionInfo ->
-            val notificationManager = NotificationManager(context)
+            val notificationManager = NotificationRepository(context)
 
             val pendingIntent = PendingIntent.getActivity(
                 context,
@@ -125,6 +128,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
             notificationManager.notify(
                 id = INSTALL_NOTIFICATION_ID,
+                tag = INSTALL_NOTIFICATION_TAG,
                 title = context.getString(R.string.install_notification_title),
                 description = context.getString(
                     R.string.install_notification_description,
@@ -141,7 +145,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      */
     private fun createInstallNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = NotificationManager(context)
+            val notificationManager = NotificationRepository(context)
             val name = context.getString(R.string.install_notification_channel)
 
             notificationManager.createChannel(
@@ -172,7 +176,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     else {
                         CoroutineScope(Dispatchers.IO).launch {
                             extras.getString(EXTRA_PACKAGE_NAME_KEY)?.let { packageId ->
-                                AppManager(context).getPackageInfo(packageId)?.let { packageInfo ->
+                                AppRepository(context).getPackageInfo(packageId)?.let { packageInfo ->
                                     showUninstallNotification(
                                         context = context,
                                         packageInfo = packageInfo,
@@ -201,7 +205,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         confirmIntent: Intent
     ) {
         createUninstallNotificationChannel(context)
-        val notificationManager = NotificationManager(context)
+        val notificationManager = NotificationRepository(context)
 
         val pendingIntent = PendingIntent.getActivity(
             context,
@@ -213,6 +217,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         withContext(Dispatchers.IO) {
             notificationManager.notify(
                 id = UNINSTALL_NOTIFICATION_ID,
+                tag = UNINSTALL_NOTIFICATION_TAG,
                 title = context.getString(R.string.uninstall_notification_title),
                 description = context.getString(
                     R.string.uninstall_notification_description,
@@ -229,7 +234,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      */
     private fun createUninstallNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = NotificationManager(context)
+            val notificationManager = NotificationRepository(context)
             val name = context.getString(R.string.uninstall_notification_channel)
 
             notificationManager.createChannel(
@@ -291,8 +296,9 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     private fun showUpgradeNotification(context: Context, sessionId: Int, confirmIntent: Intent) {
         createUpgradeNotificationChannel(context)
 
+        val notificationRepository = NotificationRepository(context)
+
         context.packageManager.packageInstaller.getSessionInfo(sessionId)?.let { sessionInfo ->
-            val notificationManager = NotificationManager(context)
 
             val pendingIntent = PendingIntent.getActivity(
                 context,
@@ -301,8 +307,9 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            notificationManager.notify(
+            notificationRepository.notify(
                 id = UPGRADE_NOTIFICATION_ID,
+                tag = UPGRADE_SINGLE_NOTIFICATION_TAG,
                 title = context.getString(R.string.upgrade_notification_title),
                 description = context.getString(
                     R.string.install_notification_description,
@@ -319,7 +326,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      */
     private fun createUpgradeNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = NotificationManager(context)
+            val notificationManager = NotificationRepository(context)
             val name = context.getString(R.string.install_notification_channel)
 
             notificationManager.createChannel(
