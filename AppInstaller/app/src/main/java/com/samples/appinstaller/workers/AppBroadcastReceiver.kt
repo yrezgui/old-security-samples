@@ -31,6 +31,9 @@ const val INSTALL_INTENT_NAME = "appinstaller_install_status"
 const val UNINSTALL_INTENT_NAME = "appinstaller_uninstall_status"
 const val UPGRADE_INTENT_NAME = "appinstaller_upgrade_status"
 
+const val SEND_INSTALL_UPDATES_PERMISSION =
+    "com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
+
 class AppBroadcastReceiver : BroadcastReceiver() {
 
     /**
@@ -87,6 +90,11 @@ class AppBroadcastReceiver : BroadcastReceiver() {
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
             PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                context.packageManager.packageInstaller.abandonSession(
+                    extras.getInt(
+                        EXTRA_SESSION_ID_KEY
+                    )
+                )
             }
         }
     }

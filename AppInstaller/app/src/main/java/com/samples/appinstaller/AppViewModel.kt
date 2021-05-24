@@ -82,7 +82,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun initSelectedApp() {
         selectedApp.addSource(store) {
-            selectedApp.value = it[_selectedAppId]
+            selectedApp.value = it[_selectedAppId.value]
         }
 
         selectedApp.addSource(_selectedAppId) {
@@ -110,8 +110,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             val sessionInfo = appManager.getCurrentInstallSession(app.id)
-                ?: appManager.getSessionInfo(appManager.createInstallSession(app.id))
+                ?: appManager.getSessionInfo(appManager.createInstallSession(app.name, app.id))
                 ?: return@launch
+
+            delay(5000L)
 
             withContext(Dispatchers.IO) {
                 appManager.writeAndCommitSession(
@@ -149,7 +151,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             val installedApps = installedPackages
                 .filterKeys { SampleStoreDB.containsKey(it) }
                 .mapValues {
-                    val storePackage = SampleStoreDB[it.key]!!
+                    val storePackage = SampleStoreDB[it.key]!!.copy(status = AppStatus.INSTALLED)
 
                     if (settings.updateAvailabilityPeriod == UpdateAvailabilityPeriod.NONE) {
                         // If the user has disabled updates or the app is currently upgrading,
@@ -179,8 +181,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
 
-            _library.postValue(installedApps + appsBeingInstalled)
-            _library.postValue(installedApps)
+            val updatedLibrary = installedApps + appsBeingInstalled
+            _library.postValue(updatedLibrary)
         }
     }
 
@@ -193,7 +195,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val settings = appSettings.value ?: return false
         val updateAvailabilityPeriod = settings.updateAvailabilityPeriod.toTemporalAmount()
 
-        if (!app.isInstalled) {
+        if (app.status != AppStatus.INSTALLED) {
             return false
         }
 

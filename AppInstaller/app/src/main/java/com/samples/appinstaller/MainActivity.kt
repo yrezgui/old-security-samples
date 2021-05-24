@@ -1,6 +1,8 @@
 package com.samples.appinstaller
 
+import android.content.IntentFilter
 import android.os.Bundle
+import android.os.Handler
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -10,12 +12,16 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.samples.appinstaller.databinding.ActivityMainBinding
+import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.SEND_INSTALL_UPDATES_PERMISSION
+import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private val appViewModel: AppViewModel by viewModels()
+    private val installerViewModel: InstallerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_store, R.id.navigation_library, R.id.navigation_settings
+                R.id.navigation_installer,
+                R.id.navigation_store,
+                R.id.navigation_library,
+                R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -44,10 +53,20 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         packageManager.packageInstaller.registerSessionCallback(appViewModel.sessionCallback)
+        registerReceiver(
+            installerViewModel.packageInstallCallback,
+            IntentFilter().apply {
+                addAction(INSTALL_INTENT_NAME)
+                addAction(UNINSTALL_INTENT_NAME)
+            },
+            SEND_INSTALL_UPDATES_PERMISSION,
+            Handler()
+        )
     }
 
     override fun onStop() {
         super.onStop()
         packageManager.packageInstaller.registerSessionCallback(appViewModel.sessionCallback)
+        unregisterReceiver(installerViewModel.packageInstallCallback)
     }
 }
