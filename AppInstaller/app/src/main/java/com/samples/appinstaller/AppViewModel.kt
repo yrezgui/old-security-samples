@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
@@ -24,6 +25,7 @@ import com.samples.appinstaller.settings.toDuration
 import com.samples.appinstaller.workers.EXTRA_PACKAGE_NAME_KEY
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UPGRADE_WORKER_TAG
 import com.samples.appinstaller.workers.UpgradeWorker
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
@@ -122,11 +124,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _library.value = library + updatedLibrary
     }
 
-    fun triggerAutoUpdating(@Suppress("UNUSED_PARAMETER") view: View) {
-        val upgradeWorkRequest = OneTimeWorkRequestBuilder<UpgradeWorker>().build()
-        WorkManager.getInstance(context).enqueue(upgradeWorkRequest)
-    }
-
     fun openApp(appId: String) {
         appManager.openApp(appId)
     }
@@ -195,9 +192,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun setAutoUpdateSchedule(value: Int) {
         viewModelScope.launch {
-            context.appSettings.updateData { currentSettings ->
-                currentSettings.toBuilder()
-                    .setAutoUpdateScheduleValue(value)
+            val autoUpdateSchedule = context.appSettings
+                .updateData { currentSettings ->
+                    currentSettings.toBuilder().setAutoUpdateScheduleValue(value).build()
+                }
+                .autoUpdateSchedule
+
+            // Cancel previous periodic task
+            WorkManager.getInstance(context).cancelAllWorkByTag(UPGRADE_WORKER_TAG)
+
+            if (autoUpdateSchedule != AutoUpdateSchedule.MANUAL) {
+                // Schedule new one based on schedule
+                PeriodicWorkRequestBuilder<UpgradeWorker>(autoUpdateSchedule.toDuration())
+                    .addTag(UPGRADE_WORKER_TAG)
                     .build()
             }
         }
@@ -214,6 +221,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     .build()
             }
         }
+    }
+
+    fun triggerAutoUpdating(@Suppress("UNUSED_PARAMETER") view: View) {
+        val upgradeWorkRequest = OneTimeWorkRequestBuilder<UpgradeWorker>().build()
+        WorkManager.getInstance(context).enqueue(upgradeWorkRequest)
     }
 
     /**
