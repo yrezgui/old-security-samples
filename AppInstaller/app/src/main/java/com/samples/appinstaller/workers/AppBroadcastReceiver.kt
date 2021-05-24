@@ -130,7 +130,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
             val name = context.getString(R.string.install_notification_channel)
 
             notificationManager.createChannel(
-                id = UNINSTALL_CHANNEL_ID,
+                id = INSTALL_CHANNEL_ID,
                 name = name,
                 description = ""
             )
