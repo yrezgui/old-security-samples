@@ -14,10 +14,11 @@ import com.samples.appinstaller.LibraryEntryActionListeners
 import com.samples.appinstaller.R
 import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.apps.AppStatus
+import com.samples.appinstaller.settings.toDuration
 
 class LibraryRecyclerViewAdapter(
     private var list: List<AppPackage>,
-    private var timestamp: Long,
+    private var currentTimestamp: Long,
     private var updateAvailabilityPeriod: AppSettings.UpdateAvailabilityPeriod,
     private val listeners: LibraryEntryActionListeners
 ) :
@@ -46,13 +47,31 @@ class LibraryRecyclerViewAdapter(
         return ViewHolder(view)
     }
 
+    /**
+     * Check if the installed time of a package is older than the UpdateAvailabilityPeriod setting
+     */
+    private fun isUpdateAvailable(lastUpdateTime: Long): Boolean {
+        if (lastUpdateTime == -1L || updateAvailabilityPeriod == AppSettings.UpdateAvailabilityPeriod.NONE) {
+            return false
+        }
+
+        val delay = updateAvailabilityPeriod.toDuration().toMillis()
+
+        return (lastUpdateTime + delay) < currentTimestamp
+    }
+
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val app = list[position]
         viewHolder.appPackage = app
         viewHolder.appNameTextView.text = app.name
         viewHolder.companyTextView.text = app.company
         viewHolder.iconImageView.setImageResource(app.icon)
-        viewHolder.statusTextView.text = app.status.toString()
+        viewHolder.statusTextView.text =
+            if (isUpdateAvailable(app.lastUpdateTime)) {
+                viewHolder.itemView.context.getString(R.string.update_available_status)
+            } else {
+                app.status.toString()
+            }
 
         viewHolder.installAppButton.visibility =
             if (app.status === AppStatus.UNINSTALLED) View.VISIBLE else View.GONE
@@ -77,7 +96,13 @@ class LibraryRecyclerViewAdapter(
         this.notifyDataSetChanged()
     }
 
+    fun updateSettings(updateAvailabilityPeriod: AppSettings.UpdateAvailabilityPeriod) {
+        this.updateAvailabilityPeriod = updateAvailabilityPeriod
+        this.notifyDataSetChanged()
+    }
+
     fun updateTimestamp(timestamp: Long) {
+        this.currentTimestamp = timestamp
         this.notifyDataSetChanged()
     }
 }

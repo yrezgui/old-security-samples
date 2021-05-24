@@ -42,8 +42,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val isPermissionGranted: Boolean
         get() = appManager.canRequestPackageInstalls()
 
-    private val _appSettings = MutableLiveData(AppSettings.getDefaultInstance())
-    val appSettings: LiveData<AppSettings> = _appSettings
+    val appSettings: LiveData<AppSettings> = context.appSettings.data.asLiveData()
 
     private val _library = MutableLiveData<LibraryEntries>(emptyMap())
     val library: LiveData<LibraryEntries> = _library
@@ -119,32 +118,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
         _library.value = library + updatedLibrary
     }
-
-    /**
-     * Check if the installed time of a package is older than the UpdateAvailabilityPeriod setting
-     */
-//    private fun checkIfUpdateIsAvailable(app: AppPackage, packageInfo: PackageInfo): Boolean {
-//        val now = Instant.now()
-//
-//        val settings = appSettings.value ?: return false
-//        val updateAvailabilityPeriod = settings.updateAvailabilityPeriod.toTemporalAmount()
-//
-//        if (app.status != AppStatus.INSTALLED) {
-//            return false
-//        }
-//
-//        val between = Duration.between(Instant.ofEpochMilli(packageInfo.lastUpdateTime), now)
-//
-//        val after = now.isAfter(
-//            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
-//        )
-//
-//        Log.d("syncAppList", "${app.id}: ${between.toMillis() / 1000}s  After: $after")
-//
-//        return now.isAfter(
-//            Instant.ofEpochMilli(packageInfo.lastUpdateTime).plus(updateAvailabilityPeriod)
-//        )
-//    }
 
     fun triggerAutoUpdating(@Suppress("UNUSED_PARAMETER") view: View) {
         val upgradeWorkRequest = OneTimeWorkRequestBuilder<UpgradeWorker>().build()

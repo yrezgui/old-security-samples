@@ -15,17 +15,24 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
+import com.samples.appinstaller.settings.appSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class LibraryFragment : Fragment() {
     private val viewModel: AppViewModel by activityViewModels()
     private lateinit var binding: FragmentLibraryBinding
+    private lateinit var adapter: LibraryRecyclerViewAdapter
 
     /**
-     * Timer to check sync app list happening every 30 seconds
+     * Timer to check updates availability
      */
     val SYNC_TIMER = 3000L
+    private var checkUpdatesJob: Job = Job()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,15 +52,26 @@ class LibraryFragment : Fragment() {
             // FIXME: Remove this delay once we sync active install sessions
             delay(500L)
             viewModel.loadLibrary()
+            startCheckUpdatesJob(this)
+        }
+    }
+
+    private suspend fun startCheckUpdatesJob(scope: CoroutineScope) {
+        checkUpdatesJob.cancel()
+        checkUpdatesJob = scope.launch {
+            while (isActive) {
+                adapter.updateTimestamp(System.currentTimeMillis())
+                delay(SYNC_TIMER)
+            }
         }
     }
 
     private fun setupUi(binding: FragmentLibraryBinding) {
         binding.showRationaleButton.setOnClickListener { showRationale() }
 
-        val adapter = LibraryRecyclerViewAdapter(
+        adapter = LibraryRecyclerViewAdapter(
             list = emptyList(),
-            timestamp = System.currentTimeMillis(),
+            currentTimestamp = System.currentTimeMillis(),
             updateAvailabilityPeriod = viewModel.appSettings.value?.updateAvailabilityPeriod
                 ?: AppSettings.getDefaultInstance().updateAvailabilityPeriod,
             listeners = object : LibraryEntryActionListeners {
@@ -87,6 +105,9 @@ class LibraryFragment : Fragment() {
 
         viewModel.library.observe(viewLifecycleOwner) {
             adapter.updateData(it.values.toList())
+        }
+        viewModel.appSettings.observe(viewLifecycleOwner) {
+            adapter.updateSettings(it.updateAvailabilityPeriod)
         }
     }
 

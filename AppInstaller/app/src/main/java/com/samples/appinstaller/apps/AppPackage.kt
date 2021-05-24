@@ -7,7 +7,6 @@ data class AppPackage(
     val name: String,
     val company: String,
     @DrawableRes val icon: Int,
-    val isUpdateAvailable: Boolean = false,
     val status: AppStatus = AppStatus.UNINSTALLED,
     val lastUpdateTime: Long = -1
 )
