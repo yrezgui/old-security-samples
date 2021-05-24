@@ -103,9 +103,10 @@ class AppManager(private val context: Context) {
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun createInstallSession(appName: String) = withContext(Dispatchers.IO) {
+    suspend fun createInstallSession(appName: String, appPackage: String) = withContext(Dispatchers.IO) {
         val params = SessionParams(SessionParams.MODE_FULL_INSTALL).apply {
             setAppLabel(appName)
+            setAppPackageName(appPackage)
         }
 
         if (BuildCompat.isAtLeastS()) {
