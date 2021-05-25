@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.navigation.NavDeepLinkBuilder
 import com.samples.appinstaller.NotificationRepository
 import com.samples.appinstaller.R
 import com.samples.appinstaller.apps.AppRepository
@@ -114,11 +115,28 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      * interaction
      */
     private fun showInstallNotification(context: Context, sessionId: Int, confirmIntent: Intent) {
-        createInstallNotificationChannel(context)
+        val notificationRepository = NotificationRepository(context)
+        val sessionInfo = context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
+        val existingNotifications = notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
 
-        context.packageManager.packageInstaller.getSessionInfo(sessionId)?.let { sessionInfo ->
-            val notificationManager = NotificationRepository(context)
+        if(existingNotifications.isNotEmpty()) {
+            val pendingIntent = NavDeepLinkBuilder(context)
+                .setGraph(R.navigation.mobile_navigation)
+                .setDestination(R.id.navigation_library)
+                .createPendingIntent()
 
+            notificationRepository.notify(
+                id = INSTALL_NOTIFICATION_ID,
+                tag = INSTALL_NOTIFICATION_TAG,
+                title = context.getString(R.string.multiple_install_notification_title),
+                description = context.getString(
+                    R.string.multiple_install_notification_description,
+                    sessionInfo.appLabel.toString()
+                ),
+                channel = INSTALL_CHANNEL_ID,
+                contentIntent = pendingIntent
+            )
+        } else {
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 1,
@@ -126,7 +144,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            notificationManager.notify(
+            notificationRepository.notify(
                 id = INSTALL_NOTIFICATION_ID,
                 tag = INSTALL_NOTIFICATION_TAG,
                 title = context.getString(R.string.install_notification_title),
@@ -297,9 +315,27 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         createUpgradeNotificationChannel(context)
 
         val notificationRepository = NotificationRepository(context)
+        val sessionInfo = context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
+        val existingNotifications = notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
 
-        context.packageManager.packageInstaller.getSessionInfo(sessionId)?.let { sessionInfo ->
+        if(existingNotifications.isNotEmpty()) {
+            val pendingIntent = NavDeepLinkBuilder(context)
+                .setGraph(R.navigation.mobile_navigation)
+                .setDestination(R.id.navigation_library)
+                .createPendingIntent()
 
+            notificationRepository.notify(
+                id = UPGRADE_NOTIFICATION_ID,
+                tag = UPGRADE_SINGLE_NOTIFICATION_TAG,
+                title = context.getString(R.string.multiple_updates_notification_title),
+                description = context.getString(
+                    R.string.multiple_updates_notification_description,
+                    sessionInfo.appLabel.toString()
+                ),
+                channel = UPGRADE_CHANNEL_ID,
+                contentIntent = pendingIntent
+            )
+        } else {
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 1,
@@ -312,7 +348,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 tag = UPGRADE_SINGLE_NOTIFICATION_TAG,
                 title = context.getString(R.string.upgrade_notification_title),
                 description = context.getString(
-                    R.string.install_notification_description,
+                    R.string.upgrade_notification_description,
                     sessionInfo.appLabel.toString()
                 ),
                 channel = UPGRADE_CHANNEL_ID,

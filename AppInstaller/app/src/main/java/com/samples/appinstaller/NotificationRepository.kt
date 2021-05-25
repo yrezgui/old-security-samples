@@ -48,4 +48,9 @@ class NotificationRepository(private val context: Context) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         return manager.activeNotifications.filter { it.tag == tag }
     }
+
+    fun cancelByTag(tag: String): List<StatusBarNotification> {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        return manager.activeNotifications.filter { it.tag == tag }
+    }
 }

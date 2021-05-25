@@ -3,6 +3,7 @@ package com.samples.appinstaller
 import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 addAction(UNINSTALL_INTENT_NAME)
             },
             SEND_INSTALL_UPDATES_PERMISSION,
-            Handler()
+            Handler(Looper.getMainLooper())
         )
     }
 

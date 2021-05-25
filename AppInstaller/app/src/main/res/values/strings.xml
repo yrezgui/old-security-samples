@@ -32,6 +32,8 @@
     <string name="install_notification_channel">Install app</string>
     <string name="install_notification_title">Install app</string>
     <string name="install_notification_description">Click here to install the app %s</string>
+    <string name="multiple_install_notification_title">Install apps</string>
+    <string name="multiple_install_notification_description">Check out these %s app installs</string>
 
     <string name="uninstall_notification_channel">Uninstall app</string>
     <string name="uninstall_notification_title">Uninstall app</string>
