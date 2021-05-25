@@ -63,6 +63,12 @@ class LibraryFragment : Fragment() {
         inflater.inflate(R.menu.library_menu, menu)
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu){
+        super.onPrepareOptionsMenu(menu)
+        val item = menu.findItem(R.id.action_refresh)
+        item.isVisible = viewModel.isPermissionGranted
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_refresh -> {
@@ -129,6 +135,7 @@ class LibraryFragment : Fragment() {
             binding.permissionSection.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.GONE
         }
+        activity?.invalidateOptionsMenu()
     }
 
     private fun showRationale() {
