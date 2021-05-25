@@ -5,6 +5,10 @@
 
     <string name="permission_description">To be able to use the store, we need to request the install permission to add apps to your device</string>
     <string name="request_permission_label">Request Permission</string>
+    <string name="authorization_dialog_title">Authorization</string>
+    <string name="authorization_dialog_description">App Installer needs this special permission to be install other apps</string>
+    <string name="authorization_dialog_confirm_label">Ok</string>
+    <string name="authorization_dialog_learn_more_label">Learn More</string>
 
     <string name="refresh_action_label">Refresh</string>
     <string name="install_label">Install</string>

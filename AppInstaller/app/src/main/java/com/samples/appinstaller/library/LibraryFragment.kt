@@ -16,8 +16,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.samples.appinstaller.AppSettings
+import com.samples.appinstaller.AppViewModel
+import com.samples.appinstaller.BuildConfig
+import com.samples.appinstaller.R
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
-import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -128,10 +131,14 @@ class LibraryFragment : Fragment() {
     private fun showRationale() {
         context?.let {
             MaterialAlertDialogBuilder(it)
-                .setTitle("Authorization")
-                .setMessage("App Installer needs this special permission to be install other apps")
-                .setPositiveButton("Ok") { _, _ -> requestPermission() }
-                .setNegativeButton("Learn More") { _, _ -> openLearnMoreLink() }
+                .setTitle(R.string.authorization_dialog_title)
+                .setMessage(R.string.authorization_dialog_description)
+                .setPositiveButton(R.string.authorization_dialog_confirm_label) { _, _ ->
+                    requestPermission()
+                }
+                .setNegativeButton(R.string.authorization_dialog_learn_more_label) { _, _ ->
+                    openLearnMoreLink()
+                }
                 .show()
         }
     }
