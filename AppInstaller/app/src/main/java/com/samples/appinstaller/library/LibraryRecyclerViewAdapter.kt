@@ -10,7 +10,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.samples.appinstaller.AppSettings
-import com.samples.appinstaller.LibraryEntryActionListeners
 import com.samples.appinstaller.R
 import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.apps.AppStatus

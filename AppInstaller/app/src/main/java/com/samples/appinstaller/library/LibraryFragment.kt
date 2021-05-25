@@ -1,4 +1,4 @@
-package com.samples.appinstaller
+package com.samples.appinstaller.library
 
 import android.content.Intent
 import android.net.Uri
@@ -23,6 +23,9 @@ import com.samples.appinstaller.R
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+const val LEARN_MORE_LINK =
+    "https://developer.android.com/reference/kotlin/android/content/pm/PackageInstaller"
 
 class LibraryFragment : Fragment() {
     private val viewModel: AppViewModel by activityViewModels()
@@ -145,8 +148,7 @@ class LibraryFragment : Fragment() {
 
     private fun openLearnMoreLink() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data =
-                Uri.parse("https://developer.android.com/reference/kotlin/android/content/pm/PackageInstaller")
+            data = Uri.parse(LEARN_MORE_LINK)
         }
 
         startActivity(intent)
