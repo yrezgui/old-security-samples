@@ -6,6 +6,7 @@
     <string name="permission_description">To be able to use the store, we need to request the install permission to add apps to your device</string>
     <string name="request_permission_label">Request Permission</string>
 
+    <string name="refresh_action_label">Refresh</string>
     <string name="install_label">Install</string>
     <string name="cancel_install_label">Cancel</string>
     <string name="open_app_install">Open</string>

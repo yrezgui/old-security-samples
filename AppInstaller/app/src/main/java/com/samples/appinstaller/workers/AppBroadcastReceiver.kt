@@ -116,10 +116,12 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      */
     private fun showInstallNotification(context: Context, sessionId: Int, confirmIntent: Intent) {
         val notificationRepository = NotificationRepository(context)
-        val sessionInfo = context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
-        val existingNotifications = notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
+        val sessionInfo =
+            context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
+        val existingNotifications =
+            notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
 
-        if(existingNotifications.isNotEmpty()) {
+        if (existingNotifications.isNotEmpty()) {
             val pendingIntent = NavDeepLinkBuilder(context)
                 .setGraph(R.navigation.mobile_navigation)
                 .setDestination(R.id.navigation_library)
@@ -194,13 +196,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     else {
                         CoroutineScope(Dispatchers.IO).launch {
                             extras.getString(EXTRA_PACKAGE_NAME_KEY)?.let { packageId ->
-                                AppRepository(context).getPackageInfo(packageId)?.let { packageInfo ->
-                                    showUninstallNotification(
-                                        context = context,
-                                        packageInfo = packageInfo,
-                                        confirmIntent = confirmIntent
-                                    )
-                                }
+                                AppRepository(context).getPackageInfo(packageId)
+                                    ?.let { packageInfo ->
+                                        showUninstallNotification(
+                                            context = context,
+                                            packageInfo = packageInfo,
+                                            confirmIntent = confirmIntent
+                                        )
+                                    }
                             }
                         }
                     }
@@ -315,10 +318,12 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         createUpgradeNotificationChannel(context)
 
         val notificationRepository = NotificationRepository(context)
-        val sessionInfo = context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
-        val existingNotifications = notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
+        val sessionInfo =
+            context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
+        val existingNotifications =
+            notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
 
-        if(existingNotifications.isNotEmpty()) {
+        if (existingNotifications.isNotEmpty()) {
             val pendingIntent = NavDeepLinkBuilder(context)
                 .setGraph(R.navigation.mobile_navigation)
                 .setDestination(R.id.navigation_library)

@@ -104,7 +104,7 @@ class LibraryRecyclerViewAdapter(
 
     override fun getItemCount() = list.size
 
-    fun updateData(list: List<AppPackage>) {
+    fun updateList(list: List<AppPackage>) {
         this.list = list
         this.notifyDataSetChanged()
     }

@@ -5,6 +5,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -15,10 +18,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import com.samples.appinstaller.library.LibraryRecyclerViewAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class LibraryFragment : Fragment() {
@@ -26,11 +26,10 @@ class LibraryFragment : Fragment() {
     private lateinit var binding: FragmentLibraryBinding
     private lateinit var adapter: LibraryRecyclerViewAdapter
 
-    /**
-     * Timer to check updates availability
-     */
-    private val SYNC_TIMER = 30000L
-    private var checkUpdatesJob: Job = Job()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,19 +47,26 @@ class LibraryFragment : Fragment() {
         togglePermissionSection()
         viewLifecycleOwner.lifecycleScope.launch {
             // TODO: Remove this delay once we sync active install sessions
+            // FIXME: Remove automatic sync
             delay(500L)
             viewModel.loadLibrary()
-            startCheckUpdatesJob(this)
         }
     }
 
-    private suspend fun startCheckUpdatesJob(scope: CoroutineScope) {
-        checkUpdatesJob.cancel()
-        checkUpdatesJob = scope.launch {
-            while (isActive) {
-                adapter.updateTimestamp(System.currentTimeMillis())
-                delay(SYNC_TIMER)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.library_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_refresh -> {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.loadLibrary()
+                    adapter.updateTimestamp(System.currentTimeMillis())
+                }
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -102,7 +108,7 @@ class LibraryFragment : Fragment() {
         binding.recyclerView.adapter = adapter
 
         viewModel.library.observe(viewLifecycleOwner) {
-            adapter.updateData(it.values.toList())
+            adapter.updateList(it.values.toList())
         }
         viewModel.appSettings.observe(viewLifecycleOwner) {
             adapter.updateSettings(it.updateAvailabilityPeriod)
