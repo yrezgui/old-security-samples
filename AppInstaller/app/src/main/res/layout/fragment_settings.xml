@@ -51,10 +51,10 @@
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <TextView
+                autoUpdateSchedule="@{viewModel.autoUpdateSchedule}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="@{viewModel.autoUpdateSchedule}"
                 android:textAppearance="?attr/textAppearanceCaption"
                 tools:text="Check and update every minute" />
         </LinearLayout>
@@ -73,11 +73,11 @@
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <TextView
+                updateAvailabilityPeriod="@{viewModel.updateAvailabilityPeriod}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="30dp"
-                android:text="@{viewModel.updateAvailabilityPeriod}"
                 android:textAppearance="?attr/textAppearanceCaption"
                 tools:text="Updates available one minute after install" />
         </LinearLayout>

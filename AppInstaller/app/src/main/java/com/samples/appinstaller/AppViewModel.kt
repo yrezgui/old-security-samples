@@ -16,8 +16,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.samples.appinstaller.AppSettings.AutoUpdateSchedule
 import com.samples.appinstaller.AppSettings.UpdateAvailabilityPeriod
-import com.samples.appinstaller.apps.AppRepository
 import com.samples.appinstaller.apps.AppPackage
+import com.samples.appinstaller.apps.AppRepository
 import com.samples.appinstaller.apps.AppStatus
 import com.samples.appinstaller.apps.SampleStoreDB
 import com.samples.appinstaller.settings.appSettings
@@ -51,35 +51,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val syncChannel = Channel<SyncAction>()
 
-    val autoUpdateSchedule = context.appSettings.data.mapLatest { settings ->
-        when (settings.autoUpdateSchedule) {
-            AutoUpdateSchedule.MANUAL -> context.getString(R.string.auto_update_disabled)
-            else -> {
-                context.resources.getString(
-                    R.string.auto_update_schedule,
-                    settings.autoUpdateSchedule.toDuration().toMinutes()
-                )
-            }
-        }
-    }.asLiveData()
+    val autoUpdateSchedule =
+        context.appSettings.data.mapLatest { it.autoUpdateSchedule }.asLiveData()
 
-    val updateAvailabilityPeriod = context.appSettings.data.mapLatest { settings ->
-        when (settings.updateAvailabilityPeriod) {
-            UpdateAvailabilityPeriod.NONE -> context.getString(R.string.update_availability_disabled)
-            UpdateAvailabilityPeriod.AFTER_30_SECONDS -> {
-                context.resources.getString(
-                    R.string.update_availability_seconds_period,
-                    settings.updateAvailabilityPeriod.toDuration().seconds
-                )
-            }
-            else -> {
-                context.resources.getString(
-                    R.string.update_availability_minutes_period,
-                    settings.updateAvailabilityPeriod.toDuration().toMinutes()
-                )
-            }
-        }
-    }.asLiveData()
+    val updateAvailabilityPeriod =
+        context.appSettings.data.mapLatest { it.updateAvailabilityPeriod }.asLiveData()
 
     init {
         viewModelScope.launch {
