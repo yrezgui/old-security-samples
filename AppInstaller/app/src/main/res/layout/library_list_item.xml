@@ -59,6 +59,13 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceListItemSecondary"
                 tools:text="Company Inc" />
+
+            <TextView
+                android:id="@+id/last_updated_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                tools:text="2021-01-01 18:24" />
         </LinearLayout>
     </LinearLayout>
 

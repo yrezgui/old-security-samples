@@ -29,6 +29,7 @@ import com.samples.appinstaller.R
 import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.apps.AppStatus
 import com.samples.appinstaller.settings.toDuration
+import java.time.Instant
 
 class LibraryRecyclerViewAdapter(
     private var list: List<AppPackage>,
@@ -39,10 +40,12 @@ class LibraryRecyclerViewAdapter(
     RecyclerView.Adapter<LibraryRecyclerViewAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val iconImageView: ImageView = view.findViewById(R.id.icon)
         val appNameTextView: TextView = view.findViewById(R.id.app_name)
         val companyTextView: TextView = view.findViewById(R.id.company)
         val statusTextView: TextView = view.findViewById(R.id.status)
-        val iconImageView: ImageView = view.findViewById(R.id.icon)
+        val lastUpdateTimeView: TextView = view.findViewById(R.id.last_updated_time)
+
         val installAppButton: Button = view.findViewById(R.id.install_app_button)
         val installingSection: LinearLayout = view.findViewById(R.id.installing_section)
         val installProgressBar: ProgressBar = view.findViewById(R.id.install_progress_bar)
@@ -80,9 +83,10 @@ class LibraryRecyclerViewAdapter(
         val isUpdateAvailable = isUpdateAvailable(app.lastUpdateTime)
 
         viewHolder.appPackage = app
+        viewHolder.iconImageView.setImageResource(app.icon)
         viewHolder.appNameTextView.text = app.name
         viewHolder.companyTextView.text = app.company
-        viewHolder.iconImageView.setImageResource(app.icon)
+        viewHolder.lastUpdateTimeView.text = Instant.ofEpochMilli(app.lastUpdateTime).toString()
         viewHolder.statusTextView.text = if (isUpdateAvailable) {
             viewHolder.itemView.context.getString(R.string.update_available_status)
         } else {
