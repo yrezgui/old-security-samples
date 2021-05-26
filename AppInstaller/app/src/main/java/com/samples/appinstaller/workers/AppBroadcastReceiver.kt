@@ -1,3 +1,18 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.samples.appinstaller.workers
 
 import android.app.PendingIntent
@@ -92,21 +107,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
+            PackageInstaller.STATUS_SUCCESS -> { }
             PackageInstaller.STATUS_FAILURE,
             PackageInstaller.STATUS_FAILURE_ABORTED,
             PackageInstaller.STATUS_FAILURE_BLOCKED,
             PackageInstaller.STATUS_FAILURE_CONFLICT,
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                try {
-                    // If the app installer has been uninstalled
-                    context.packageManager.packageInstaller.abandonSession(sessionId)
-                } catch (e: Exception) {
-                }
-            }
+            PackageInstaller.STATUS_FAILURE_STORAGE -> { }
         }
     }
 
@@ -209,10 +217,8 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
-            else -> {
-            }
+            PackageInstaller.STATUS_SUCCESS -> { }
+            else -> { }
         }
     }
 
@@ -267,7 +273,6 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     }
 
     private fun handleUpgradeBroadcast(context: Context, status: Int, extras: Bundle) {
-
         val sessionId = extras.getInt(EXTRA_SESSION_ID_KEY)
 
         when (status) {
@@ -292,21 +297,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
+            PackageInstaller.STATUS_SUCCESS -> { }
             PackageInstaller.STATUS_FAILURE,
             PackageInstaller.STATUS_FAILURE_ABORTED,
             PackageInstaller.STATUS_FAILURE_BLOCKED,
             PackageInstaller.STATUS_FAILURE_CONFLICT,
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                try {
-                    // If the app installer has been uninstalled
-                    context.packageManager.packageInstaller.abandonSession(sessionId)
-                } catch (e: Exception) {
-                }
-            }
+            PackageInstaller.STATUS_FAILURE_STORAGE -> {}
         }
     }
 
