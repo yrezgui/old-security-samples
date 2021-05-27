@@ -37,6 +37,10 @@ warning messages are shown to the user
 This sample uses the Gradle build system. To build this project, use the "gradlew build" command or 
 use "Import Project" in Android Studio.
 
+## Screenshots
+
+<img src="screenshots/library.png" height="400" alt="Screenshot showing the list of apps in the store"/> <img src="screenshots/install-app.png" height="400" alt="Screenshot showing the install dialog"/> <img src="screenshots/settings.png" height="400" alt="Screenshot showing the settings screen"/> 
+
 ## Support
 
 If you've found an error in this sample, please file an issue [here](https://github.com/android/security-samples/issues).
