@@ -112,7 +112,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     lastUpdateTime = System.currentTimeMillis()
                 )
                 SyncType.INSTALL_FAILURE -> app.id to app.copy(status = AppStatus.UNINSTALLED)
-                SyncType.UNINSTALL_SUCCESS -> app.id to app.copy(status = AppStatus.UNINSTALLED)
+                SyncType.UNINSTALL_SUCCESS -> app.id to app.copy(
+                    status = AppStatus.UNINSTALLED,
+                    lastUpdateTime = -1
+                )
                 SyncType.UNINSTALL_FAILURE -> app.id to app.copy(status = AppStatus.INSTALLED)
             }
         )
