@@ -50,9 +50,7 @@ Following the ability to install applications, we can create [PackageInstaller.S
 [PackageInstaller.createSession][2] where we will copy the APK to be installed. Once we have a 
 session ID, we open the session using [PackageInstaller.openSession][3], we write the APK bytes to 
 it. We finish by calling [Session.commit][4] with a [PendingIntent][5] to be called if the install 
-action requires user confirmation like this:
-
-<img src="screenshots/install-app.png" height="400" alt="Screenshot showing the install dialog"/>
+action requires user confirmation.
 
 To handle install status (including [PackageInstaller.STATUS_PENDING_USER_ACTION][6]), we need to 
 register a [BroadcastReceiver][7] that will listen to intents we've initialized during our session
