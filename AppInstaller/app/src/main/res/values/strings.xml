@@ -38,15 +38,17 @@
     <string name="install_notification_title">Install app</string>
     <string name="install_notification_description">Click here to install the app %s</string>
     <string name="multiple_install_notification_title">Install apps</string>
-    <string name="multiple_install_notification_description">Check out these %s app installs</string>
+    <string name="multiple_install_notification_description">Click here to install these apps</string>
 
     <string name="uninstall_notification_channel">Uninstall app</string>
     <string name="uninstall_notification_title">Uninstall app</string>
     <string name="uninstall_notification_description">Click here to uninstall the app %s</string>
+    <string name="multiple_uninstall_notification_title">Uninstall apps</string>
+    <string name="multiple_uninstall_notification_description">Click here to uninstall these apps</string>
 
     <string name="upgrade_notification_channel">Upgrade app</string>
     <string name="upgrade_notification_title">Upgrade app</string>
     <string name="upgrade_notification_description">Click here to upgrade the app %s</string>
-    <string name="multiple_updates_notification_title">Upgrade apps</string>
-    <string name="multiple_updates_notification_description">Check out these %s app upgrades</string>
+    <string name="multiple_upgrades_notification_title">Upgrade apps</string>
+    <string name="multiple_upgrades_notification_description">Click here to upgrade these apps</string>
 </resources>
