@@ -50,7 +50,7 @@
                     android:gravity="end"
                     android:text="@string/update_available_status"
                     android:textAlignment="gravity"
-                    android:textColor="?attr/colorSecondary" />
+                    android:textColor="#00838F" />
             </LinearLayout>
 
             <TextView
@@ -103,7 +103,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:enabled="false"
-                android:text="@string/open_app_install" />
+                android:text="@string/open_app_install"
+                tools:ignore="DuplicateSpeakableTextCheck" />
 
         </LinearLayout>
 
