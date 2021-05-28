@@ -107,14 +107,16 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> { }
+            PackageInstaller.STATUS_SUCCESS -> {
+            }
             PackageInstaller.STATUS_FAILURE,
             PackageInstaller.STATUS_FAILURE_ABORTED,
             PackageInstaller.STATUS_FAILURE_BLOCKED,
             PackageInstaller.STATUS_FAILURE_CONFLICT,
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> { }
+            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+            }
         }
     }
 
@@ -217,8 +219,10 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> { }
-            else -> { }
+            PackageInstaller.STATUS_SUCCESS -> {
+            }
+            else -> {
+            }
         }
     }
 
@@ -297,14 +301,16 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> { }
+            PackageInstaller.STATUS_SUCCESS -> {
+            }
             PackageInstaller.STATUS_FAILURE,
             PackageInstaller.STATUS_FAILURE_ABORTED,
             PackageInstaller.STATUS_FAILURE_BLOCKED,
             PackageInstaller.STATUS_FAILURE_CONFLICT,
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
             PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> {}
+            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+            }
         }
     }
 

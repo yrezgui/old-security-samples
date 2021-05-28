@@ -82,7 +82,7 @@ class AppRepository(private val context: Context) {
                 // the installerPackageName is the current app. Android loses the originatingUid
                 // when the installer itself is uninstalled during a commit session
                 it.originatingUid == context.applicationInfo.uid &&
-                    it.appPackageName == packageName
+                        it.appPackageName == packageName
             }
         }
     }
