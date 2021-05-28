@@ -15,6 +15,8 @@
  */
 package com.samples.appinstaller
 
+import android.content.Intent.ACTION_PACKAGE_ADDED
+import android.content.Intent.ACTION_PACKAGE_REMOVED
 import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
@@ -31,6 +33,7 @@ import com.samples.appinstaller.databinding.ActivityMainBinding
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.SEND_INSTALL_UPDATES_PERMISSION
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 
 class MainActivity : AppCompatActivity() {
 
@@ -60,19 +63,35 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp(appBarConfiguration) ||
-            super.onSupportNavigateUp()
+                super.onSupportNavigateUp()
     }
 
     override fun onStart() {
         super.onStart()
+        val handler = Handler(Looper.getMainLooper())
+
         registerReceiver(
             appViewModel.packageInstallCallback,
             IntentFilter().apply {
                 addAction(INSTALL_INTENT_NAME)
                 addAction(UNINSTALL_INTENT_NAME)
+                addAction(UPGRADE_INTENT_NAME)
             },
             SEND_INSTALL_UPDATES_PERMISSION,
-            Handler(Looper.getMainLooper())
+            handler
+        )
+
+        // We have to register the observer twice as parameters are different between these two
+        // groups of intents
+        registerReceiver(
+            appViewModel.packageInstallCallback,
+            IntentFilter().apply {
+                addAction(ACTION_PACKAGE_ADDED)
+                addAction(ACTION_PACKAGE_REMOVED)
+                addDataScheme("package")
+            },
+            null,
+            handler
         )
     }
 

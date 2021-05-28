@@ -6,11 +6,10 @@ Android S+ devices.
 ## TODO
 - Manual refresh button ✅
 - Show lastUpdateTime in the Library ✅
-- Fix library refresh
+- Fix upgrade ✅
+- Listen to PACKAGE_ADDED ✅
+- Fix library refresh ✅
 - Fix notifications
-- Fix upgrade
-- Listen to PACKAGE_ADDED
-- android.intent.action.PACKAGE_ADDED
 - Add explanations on how the install flow works
 
 ## What the sample does

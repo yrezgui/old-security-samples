@@ -86,11 +86,15 @@ class LibraryRecyclerViewAdapter(
         viewHolder.iconImageView.setImageResource(app.icon)
         viewHolder.appNameTextView.text = app.name
         viewHolder.companyTextView.text = app.company
-        viewHolder.lastUpdateTimeView.text = Instant.ofEpochMilli(app.lastUpdateTime).toString()
         viewHolder.statusTextView.text = if (isUpdateAvailable) {
             viewHolder.itemView.context.getString(R.string.update_available_status)
         } else {
             app.status.toString()
+        }
+
+        // We don't display the lastUpdateTime if the app isn't installed
+        if (app.lastUpdateTime != -1L) {
+            viewHolder.lastUpdateTimeView.text = Instant.ofEpochMilli(app.lastUpdateTime).toString()
         }
 
         viewHolder.installAppButton.visibility =

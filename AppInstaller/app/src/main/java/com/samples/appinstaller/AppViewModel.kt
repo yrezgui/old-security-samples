@@ -19,7 +19,9 @@ import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.EXTRA_REPLACING
 import android.content.pm.PackageInstaller
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -40,6 +42,7 @@ import com.samples.appinstaller.settings.toDuration
 import com.samples.appinstaller.workers.EXTRA_PACKAGE_NAME_KEY
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
+import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_WORKER_TAG
 import com.samples.appinstaller.workers.UpgradeWorker
 import kotlinx.coroutines.channels.Channel
@@ -49,6 +52,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 typealias LibraryEntries = Map<String, AppPackage>
+
+const val DOWNLOADING_DELAY = 3000L
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val context: Context
@@ -139,7 +144,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
 
             // We fake a delay to show active work. This would be replaced by real APK download
-            delay(3000L)
+            delay(DOWNLOADING_DELAY)
 
             appRepository.writeAndCommitSession(
                 sessionId = sessionInfo.sessionId,
@@ -166,7 +171,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             syncChannel.send(SyncAction(SyncType.INSTALLING, appId))
 
             // We fake a delay to show active work. This would be replaced by real APK download
-            delay(3000L)
+            delay(DOWNLOADING_DELAY)
 
             appRepository.writeAndCommitSession(
                 sessionId = sessionInfo.sessionId,
@@ -223,22 +228,47 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val packageInstallCallback = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
-            val status = intent.extras?.getInt(PackageInstaller.EXTRA_STATUS) ?: return
-            val appId = intent.extras?.getString(EXTRA_PACKAGE_NAME_KEY) ?: return
+
+            Log.d("packageInstallCallback", "action: $action")
 
             viewModelScope.launch {
                 when (action) {
-                    INSTALL_INTENT_NAME -> onInstall(status, appId)
-                    UNINSTALL_INTENT_NAME -> onUninstall(status, appId)
+                    // Install broadcast triggered by the system
+                    Intent.ACTION_PACKAGE_ADDED -> {
+                        val packageName = intent.data?.schemeSpecificPart ?: return@launch
+                        // We ignore the broadcast if the app isn't part of our store
+                        SampleStoreDB[packageName] ?: return@launch
+                        syncChannel.send(SyncAction(SyncType.INSTALL_SUCCESS, packageName))
+                    }
+                    // Uninstall broadcast triggered by the system
+                    // Helps us to maintain up to date library in case the user uninstalls one of
+                    // our app from the system settings
+                    Intent.ACTION_PACKAGE_REMOVED -> {
+                        if (!intent.getBooleanExtra(EXTRA_REPLACING, false)) {
+                            val packageName = intent.data?.schemeSpecificPart ?: return@launch
+                            // We ignore the broadcast if the app isn't part of our store
+                            SampleStoreDB[packageName] ?: return@launch
+                            syncChannel.send(SyncAction(SyncType.UNINSTALL_SUCCESS, packageName))
+                        }
+                    }
+                    // Broadcast triggered by our app
+                    INSTALL_INTENT_NAME,
+                    UPGRADE_INTENT_NAME,
+                    UNINSTALL_INTENT_NAME -> {
+                        val status =
+                            intent.extras?.getInt(PackageInstaller.EXTRA_STATUS) ?: return@launch
+                        val packageName = intent.extras?.getString(EXTRA_PACKAGE_NAME_KEY)
+                            ?: intent.data?.schemeSpecificPart
+                            ?: return@launch
+                        onInternalBroadcast(status, packageName)
+                    }
                 }
             }
         }
 
-        suspend fun onInstall(status: Int, appId: String) {
+        suspend fun onInternalBroadcast(status: Int, packageName: String) {
             when (status) {
-                PackageInstaller.STATUS_SUCCESS -> {
-                    syncChannel.send(SyncAction(SyncType.INSTALL_SUCCESS, appId))
-                }
+                // We monitor user cancellation or system failure of these actions within our app
                 PackageInstaller.STATUS_FAILURE,
                 PackageInstaller.STATUS_FAILURE_ABORTED,
                 PackageInstaller.STATUS_FAILURE_BLOCKED,
@@ -246,24 +276,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
                 PackageInstaller.STATUS_FAILURE_INVALID,
                 PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    syncChannel.send(SyncAction(SyncType.INSTALL_FAILURE, appId))
+                    syncChannel.send(SyncAction(SyncType.INSTALL_FAILURE, packageName))
                 }
-            }
-        }
-
-        suspend fun onUninstall(status: Int, appId: String) {
-            when (status) {
-                PackageInstaller.STATUS_SUCCESS -> {
-                    syncChannel.send(SyncAction(SyncType.UNINSTALL_SUCCESS, appId))
-                }
-                PackageInstaller.STATUS_FAILURE,
-                PackageInstaller.STATUS_FAILURE_ABORTED,
-                PackageInstaller.STATUS_FAILURE_BLOCKED,
-                PackageInstaller.STATUS_FAILURE_CONFLICT,
-                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-                PackageInstaller.STATUS_FAILURE_INVALID,
-                PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    syncChannel.send(SyncAction(SyncType.UNINSTALL_FAILURE, appId))
+                else -> {
                 }
             }
         }
