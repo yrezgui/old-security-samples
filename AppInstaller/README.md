@@ -3,15 +3,6 @@
 This sample demonstrates how to use the Package Installer API to install, upgrade and delete apps on
 Android S+ devices.
 
-## TODO
-- Manual refresh button ✅
-- Show lastUpdateTime in the Library ✅
-- Fix upgrade ✅
-- Listen to PACKAGE_ADDED ✅
-- Fix library refresh ✅
-- Fix notifications
-- Add explanations on how the install flow works
-
 ## What the sample does
 
 The sample app addresses the following critical user journeys:

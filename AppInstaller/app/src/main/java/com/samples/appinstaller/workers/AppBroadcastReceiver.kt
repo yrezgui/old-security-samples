@@ -55,7 +55,7 @@ const val UNINSTALL_NOTIFICATION_TAG = "uninstall"
 const val UPGRADE_INTENT_NAME = "appinstaller_upgrade_status"
 const val UPGRADE_CHANNEL_ID = "upgrade"
 const val UPGRADE_NOTIFICATION_ID = 3
-const val UPGRADE_SINGLE_NOTIFICATION_TAG = "upgrade_single_app"
+const val UPGRADE_NOTIFICATION_TAG = "upgrade_single_app"
 
 class AppBroadcastReceiver : BroadcastReceiver() {
 
@@ -107,15 +107,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
-            PackageInstaller.STATUS_FAILURE,
-            PackageInstaller.STATUS_FAILURE_ABORTED,
-            PackageInstaller.STATUS_FAILURE_BLOCKED,
-            PackageInstaller.STATUS_FAILURE_CONFLICT,
-            PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-            PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+            else -> {
             }
         }
     }
@@ -129,7 +121,9 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         val sessionInfo =
             context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
         val existingNotifications =
-            notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
+            notificationRepository.getActiveNotificationsByTag(INSTALL_NOTIFICATION_TAG)
+
+        createInstallNotificationChannel(context)
 
         if (existingNotifications.isNotEmpty()) {
             val pendingIntent = NavDeepLinkBuilder(context)
@@ -141,10 +135,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 id = INSTALL_NOTIFICATION_ID,
                 tag = INSTALL_NOTIFICATION_TAG,
                 title = context.getString(R.string.multiple_install_notification_title),
-                description = context.getString(
-                    R.string.multiple_install_notification_description,
-                    sessionInfo.appLabel.toString()
-                ),
+                description = context.getString(R.string.multiple_install_notification_description),
                 channel = INSTALL_CHANNEL_ID,
                 contentIntent = pendingIntent
             )
@@ -188,40 +179,34 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
     private fun handleUninstallBroadcast(context: Context, status: Int, extras: Bundle) {
 
-        when (status) {
-            PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
+        if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
 
-                confirmIntent?.let {
-                    Log.d("UninstallReceiver", "STATUS_PENDING_USER_ACTION")
+        val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
 
-                    // Our app is currently used by the user, so we can show the uninstall dialog
-                    if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                        confirmIntent.flags = FLAG_ACTIVITY_NEW_TASK
-                        context.startActivity(confirmIntent)
-                    }
-                    // In this case, our app is paused or closed, so it's better to a show an uninstall
-                    // notification first rather than showing the install dialog which would be
-                    // confusing as it will appear without explanation
-                    else {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            extras.getString(EXTRA_PACKAGE_NAME_KEY)?.let { packageId ->
-                                AppRepository(context).getPackageInfo(packageId)
-                                    ?.let { packageInfo ->
-                                        showUninstallNotification(
-                                            context = context,
-                                            packageInfo = packageInfo,
-                                            confirmIntent = confirmIntent
-                                        )
-                                    }
+        confirmIntent?.let {
+            Log.d("UninstallReceiver", "STATUS_PENDING_USER_ACTION")
+
+            // Our app is currently used by the user, so we can show the uninstall dialog
+            if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                confirmIntent.flags = FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(confirmIntent)
+            }
+            // In this case, our app is paused or closed, so it's better to a show an uninstall
+            // notification first rather than showing the install dialog which would be
+            // confusing as it will appear without explanation
+            else {
+                CoroutineScope(Dispatchers.IO).launch {
+                    extras.getString(EXTRA_PACKAGE_NAME_KEY)?.let { packageId ->
+                        AppRepository(context).getPackageInfo(packageId)
+                            ?.let { packageInfo ->
+                                showUninstallNotification(
+                                    context = context,
+                                    packageInfo = packageInfo,
+                                    confirmIntent = confirmIntent
+                                )
                             }
-                        }
                     }
                 }
-            }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
-            else -> {
             }
         }
     }
@@ -236,27 +221,47 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         confirmIntent: Intent
     ) {
         createUninstallNotificationChannel(context)
+
+        val notificationRepository = NotificationRepository(context)
         val notificationManager = NotificationRepository(context)
+        val existingNotifications =
+            notificationRepository.getActiveNotificationsByTag(UNINSTALL_NOTIFICATION_TAG)
 
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            1,
-            confirmIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        if (existingNotifications.isNotEmpty()) {
+            val pendingIntent = NavDeepLinkBuilder(context)
+                .setGraph(R.navigation.mobile_navigation)
+                .setDestination(R.id.navigation_library)
+                .createPendingIntent()
 
-        withContext(Dispatchers.IO) {
-            notificationManager.notify(
+            notificationRepository.notify(
                 id = UNINSTALL_NOTIFICATION_ID,
                 tag = UNINSTALL_NOTIFICATION_TAG,
-                title = context.getString(R.string.uninstall_notification_title),
-                description = context.getString(
-                    R.string.uninstall_notification_description,
-                    context.packageManager.getApplicationLabel(packageInfo.applicationInfo)
-                ),
+                title = context.getString(R.string.multiple_uninstall_notification_title),
+                description = context.getString(R.string.multiple_uninstall_notification_description),
                 channel = UNINSTALL_CHANNEL_ID,
                 contentIntent = pendingIntent
             )
+        } else {
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                1,
+                confirmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            withContext(Dispatchers.IO) {
+                notificationManager.notify(
+                    id = UNINSTALL_NOTIFICATION_ID,
+                    tag = UNINSTALL_NOTIFICATION_TAG,
+                    title = context.getString(R.string.uninstall_notification_title),
+                    description = context.getString(
+                        R.string.uninstall_notification_description,
+                        context.packageManager.getApplicationLabel(packageInfo.applicationInfo)
+                    ),
+                    channel = UNINSTALL_CHANNEL_ID,
+                    contentIntent = pendingIntent
+                )
+            }
         }
     }
 
@@ -279,37 +284,25 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     private fun handleUpgradeBroadcast(context: Context, status: Int, extras: Bundle) {
         val sessionId = extras.getInt(EXTRA_SESSION_ID_KEY)
 
-        when (status) {
-            PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
+        if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
 
-                // Our app is currently used by the user, so we can show the install dialog
-                if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                    confirmIntent?.flags = FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(confirmIntent)
-                }
-                // In this case, our app is paused or closed, so it's better to a show an upgrade
-                // notification first rather than showing the upgrade dialog which would be
-                // confusing as it will appear without explanation
-                else {
-                    if (confirmIntent != null) {
-                        showUpgradeNotification(
-                            context = context,
-                            sessionId = sessionId,
-                            confirmIntent = confirmIntent
-                        )
-                    }
-                }
-            }
-            PackageInstaller.STATUS_SUCCESS -> {
-            }
-            PackageInstaller.STATUS_FAILURE,
-            PackageInstaller.STATUS_FAILURE_ABORTED,
-            PackageInstaller.STATUS_FAILURE_BLOCKED,
-            PackageInstaller.STATUS_FAILURE_CONFLICT,
-            PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-            PackageInstaller.STATUS_FAILURE_INVALID,
-            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+        val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
+
+        // Our app is currently used by the user, so we can show the install dialog
+        if (false && ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            confirmIntent?.flags = FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(confirmIntent)
+        }
+        // In this case, our app is paused or closed, so it's better to a show an upgrade
+        // notification first rather than showing the upgrade dialog which would be
+        // confusing as it will appear without explanation
+        else {
+            if (confirmIntent != null) {
+                showUpgradeNotification(
+                    context = context,
+                    sessionId = sessionId,
+                    confirmIntent = confirmIntent
+                )
             }
         }
     }
@@ -325,7 +318,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         val sessionInfo =
             context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
         val existingNotifications =
-            notificationRepository.getActiveNotificationsByTag(UPGRADE_SINGLE_NOTIFICATION_TAG)
+            notificationRepository.getActiveNotificationsByTag(UPGRADE_NOTIFICATION_TAG)
 
         if (existingNotifications.isNotEmpty()) {
             val pendingIntent = NavDeepLinkBuilder(context)
@@ -335,12 +328,9 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
             notificationRepository.notify(
                 id = UPGRADE_NOTIFICATION_ID,
-                tag = UPGRADE_SINGLE_NOTIFICATION_TAG,
-                title = context.getString(R.string.multiple_updates_notification_title),
-                description = context.getString(
-                    R.string.multiple_updates_notification_description,
-                    sessionInfo.appLabel.toString()
-                ),
+                tag = UPGRADE_NOTIFICATION_TAG,
+                title = context.getString(R.string.multiple_upgrades_notification_title),
+                description = context.getString(R.string.multiple_upgrades_notification_description),
                 channel = UPGRADE_CHANNEL_ID,
                 contentIntent = pendingIntent
             )
@@ -354,7 +344,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
             notificationRepository.notify(
                 id = UPGRADE_NOTIFICATION_ID,
-                tag = UPGRADE_SINGLE_NOTIFICATION_TAG,
+                tag = UPGRADE_NOTIFICATION_TAG,
                 title = context.getString(R.string.upgrade_notification_title),
                 description = context.getString(
                     R.string.upgrade_notification_description,
@@ -372,7 +362,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     private fun createUpgradeNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = NotificationRepository(context)
-            val name = context.getString(R.string.install_notification_channel)
+            val name = context.getString(R.string.upgrade_notification_channel)
 
             notificationManager.createChannel(
                 id = UPGRADE_CHANNEL_ID,
