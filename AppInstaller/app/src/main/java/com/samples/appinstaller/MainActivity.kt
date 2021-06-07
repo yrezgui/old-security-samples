@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp(appBarConfiguration) ||
-                super.onSupportNavigateUp()
+            super.onSupportNavigateUp()
     }
 
     override fun onStart() {
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 addAction(UNINSTALL_INTENT_NAME)
                 addAction(UPGRADE_INTENT_NAME)
             },
-            SEND_INSTALL_UPDATES_PERMISSION,
+            null,
             handler
         )
 

@@ -39,7 +39,6 @@ import com.samples.appinstaller.apps.AppStatus
 import com.samples.appinstaller.apps.SampleStoreDB
 import com.samples.appinstaller.settings.appSettings
 import com.samples.appinstaller.settings.toDuration
-import com.samples.appinstaller.workers.EXTRA_PACKAGE_NAME_KEY
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
@@ -90,7 +89,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             .mapValues {
                 SampleStoreDB[it.key]!!.copy(
                     status = AppStatus.INSTALLED,
-                    lastUpdateTime = it.value.lastUpdateTime
+                    updatedAt = it.value.lastUpdateTime
                 )
             }
 
@@ -109,12 +108,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 SyncType.INSTALLING -> app.id to app.copy(status = AppStatus.INSTALLING)
                 SyncType.INSTALL_SUCCESS -> app.id to app.copy(
                     status = AppStatus.INSTALLED,
-                    lastUpdateTime = System.currentTimeMillis()
+                    updatedAt = System.currentTimeMillis()
                 )
                 SyncType.INSTALL_FAILURE -> app.id to app.copy(status = AppStatus.UNINSTALLED)
                 SyncType.UNINSTALL_SUCCESS -> app.id to app.copy(
                     status = AppStatus.UNINSTALLED,
-                    lastUpdateTime = -1
+                    updatedAt = -1
                 )
                 SyncType.UNINSTALL_FAILURE -> app.id to app.copy(status = AppStatus.INSTALLED)
             }
@@ -260,7 +259,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     UNINSTALL_INTENT_NAME -> {
                         val status =
                             intent.extras?.getInt(PackageInstaller.EXTRA_STATUS) ?: return@launch
-                        val packageName = intent.extras?.getString(EXTRA_PACKAGE_NAME_KEY)
+                        val packageName = intent.extras?.getString(PackageInstaller.EXTRA_PACKAGE_NAME)
                             ?: intent.data?.schemeSpecificPart
                             ?: return@launch
                         onInternalBroadcast(status, packageName)

@@ -3,28 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.samples.appinstaller">
 
-    <!-- We create this permission to only let the system sends us broadcasts on our app installs -->
-    <permission
-        android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES"
-        android:protectionLevel="signatureOrSystem"
-        tools:ignore="SignatureOrSystemPermissions" />
-
     <!-- We use this permission to install apps -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- We use this permission to uninstall apps -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
 
-    <!-- We use this permission to install & uninstall apps with a better user experience -->
+    <!-- We use this permission to update apps with a better user experience -->
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
 
     <!-- We use this permission to get the list of our installed apps -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
-
-    <!-- We use this permission to receive broadcasts on our app installs -->
-    <uses-permission android:name="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES" />
 
     <application
         android:allowBackup="true"
@@ -44,9 +35,11 @@
         </activity>
 
         <!-- We receive install, update and uninstall broadcast messages through this receiver -->
+        <!-- The exported flag set to false is important to make sure we only receives broadcast
+        messages from our app or the system as the receiver isn't exposed to other apps -->
         <receiver
             android:name=".workers.AppBroadcastReceiver"
-            android:permission="com.samples.appinstaller.permission.SEND_INSTALLER_UPDATES">
+            android:exported="false">
             <intent-filter>
                 <action android:name="appinstaller_install_status" />
                 <action android:name="appinstaller_uninstall_status" />

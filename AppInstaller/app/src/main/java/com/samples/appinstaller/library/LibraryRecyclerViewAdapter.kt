@@ -80,7 +80,7 @@ class LibraryRecyclerViewAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val app = list[position]
-        val isUpdateAvailable = isUpdateAvailable(app.lastUpdateTime)
+        val isUpdateAvailable = isUpdateAvailable(app.updatedAt)
 
         viewHolder.appPackage = app
         viewHolder.iconImageView.setImageResource(app.icon)
@@ -93,8 +93,8 @@ class LibraryRecyclerViewAdapter(
         }
 
         // We don't display the lastUpdateTime if the app isn't installed
-        if (app.lastUpdateTime != -1L) {
-            viewHolder.lastUpdateTimeView.text = Instant.ofEpochMilli(app.lastUpdateTime).toString()
+        if (app.updatedAt != -1L) {
+            viewHolder.lastUpdateTimeView.text = Instant.ofEpochMilli(app.updatedAt).toString()
         }
 
         viewHolder.installAppButton.visibility =

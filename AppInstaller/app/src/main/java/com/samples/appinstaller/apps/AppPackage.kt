@@ -23,7 +23,7 @@ data class AppPackage(
     val company: String,
     @DrawableRes val icon: Int,
     val status: AppStatus = AppStatus.UNINSTALLED,
-    val lastUpdateTime: Long = -1
+    val updatedAt: Long = -1
 )
 
 enum class AppStatus {
