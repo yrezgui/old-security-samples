@@ -87,3 +87,40 @@ Patches are encouraged, and may be submitted by forking this project and submitt
 through GitHub but the scope of the sample is on purpose limited to not complexify it. Create an 
 issue explaining your upcoming changes before committing to them. Please see CONTRIBUTING.md for 
 more details.
+
+## TODO
+
+* Use a custom receiver for the UI instead of using broadcast receiver
+* On uninstall, check if the app is still installed
+* Use persistence with Room when creating sessions
+    * Let the progress bar shows if the session is still in progress
+    * Clear the session (both the packageInstaller and the database if 1 minute has passed since it became committed)
+* Launch the install/uninstall dialog from the activity instead of the broadcast receiver
+* Remove notification for the uninstall step
+* Remove the false thing
+* Trigger WorkManager (figure out)
+* Fix isUpgrade property in the worker
+* https://developer.android.com/reference/android/content/pm/PackageInstaller.SessionInfo#createDetailsIntent()
+    * Scroll to item once intent is opened
+    * https://developer.android.com/reference/android/content/pm/PackageInstaller#ACTION_SESSION_DETAILS
+    * https://developer.android.com/reference/android/content/Intent#ACTION_SHOW_APP_INFO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

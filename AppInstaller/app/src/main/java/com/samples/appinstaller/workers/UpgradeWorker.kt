@@ -92,7 +92,7 @@ class UpgradeWorker(appContext: Context, workerParams: WorkerParameters) :
         appManager.writeAndCommitSession(
             sessionId = sessionInfo.sessionId,
             apkInputStream = context.assets.open("${packageInfo.packageName}.apk"),
-            isUpgrade = false
+            isUpgrade = true
         )
     }
 }

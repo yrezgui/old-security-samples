@@ -16,6 +16,10 @@
 package com.samples.appinstaller.apps
 
 import androidx.annotation.DrawableRes
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 
 data class AppPackage(
     val id: String,
@@ -28,4 +32,19 @@ data class AppPackage(
 
 enum class AppStatus {
     UNINSTALLED, INSTALLED, INSTALLING, UPGRADING
+}
+
+@Entity(
+    tableName = "install_sessions",
+    indices = [Index(name = "index_package_name", value = ["package_name"])]
+)
+data class InstallSession(
+    @PrimaryKey val id: Int,
+    @ColumnInfo(name = "package_name") val packageName: String,
+    @ColumnInfo(name = "active") val active: Boolean,
+    @ColumnInfo(name = "created_at") val createdAt: Long = -1
+)
+
+enum class SessionStatus {
+    INACTIVE, ACTIVE, COMMITTED
 }

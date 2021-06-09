@@ -31,7 +31,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.samples.appinstaller.databinding.ActivityMainBinding
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
-import com.samples.appinstaller.workers.SEND_INSTALL_UPDATES_PERMISSION
 import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 
