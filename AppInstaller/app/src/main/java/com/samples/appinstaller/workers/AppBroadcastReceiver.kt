@@ -187,7 +187,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
 
         // Our app is currently used by the user, so we can show the install dialog
-        if (false && ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+        if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             confirmIntent?.flags = FLAG_ACTIVITY_NEW_TASK
             context.startActivity(confirmIntent)
         }
