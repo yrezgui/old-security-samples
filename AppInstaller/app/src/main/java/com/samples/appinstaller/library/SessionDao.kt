@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg sessions: InstallSession)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(session: InstallSession)
 
     @Delete
