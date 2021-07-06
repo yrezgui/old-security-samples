@@ -25,14 +25,14 @@ import com.samples.appinstaller.apps.InstallSession
 @Dao
 interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(session: InstallSession)
+    suspend fun insert(session: InstallSession)
 
     @Delete
-    fun delete(session: InstallSession)
+    suspend fun delete(session: InstallSession)
 
     @Query("SELECT * FROM install_sessions WHERE packageName = :packageName LIMIT 1")
-    fun findByPackageName(packageName: String): InstallSession
+    suspend fun findByPackageName(packageName: String): InstallSession
 
     @Query("DELETE FROM install_sessions WHERE packageName = :packageName")
-    fun deleteByPackageName(packageName: String)
+    suspend fun deleteByPackageName(packageName: String)
 }

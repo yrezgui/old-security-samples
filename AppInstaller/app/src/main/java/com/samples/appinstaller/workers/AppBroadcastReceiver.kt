@@ -29,7 +29,10 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavDeepLinkBuilder
+import androidx.room.Room
+import com.samples.appinstaller.AppDatabase
 import com.samples.appinstaller.AppInstallerApplication
+import com.samples.appinstaller.DATABASE_NAME
 import com.samples.appinstaller.NotificationRepository
 import com.samples.appinstaller.R
 import com.samples.appinstaller.SyncEvent
@@ -64,12 +67,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         Log.d("AppBroadcastReceiver", "action: $action || status: $status || message: $message")
 
         context?.let {
+            val appContext = context.applicationContext as AppInstallerApplication
+
             when (action) {
-                ACTION_PACKAGE_ADDED -> onPackageAddedBroadcast(context, intent)
-                ACTION_PACKAGE_REMOVED -> onPackageRemovedBroadcast(context, intent)
-                INSTALL_INTENT_NAME -> onInstallBroadcast(context, status, extras)
-                UNINSTALL_INTENT_NAME -> onUninstallBroadcast(context, status, extras)
-                UPGRADE_INTENT_NAME -> onUpgradeBroadcast(context, status, extras)
+                ACTION_PACKAGE_ADDED -> onPackageAddedBroadcast(appContext, intent)
+                ACTION_PACKAGE_REMOVED -> onPackageRemovedBroadcast(appContext, intent)
+                INSTALL_INTENT_NAME -> onInstallBroadcast(appContext, status, extras)
+                UNINSTALL_INTENT_NAME -> onUninstallBroadcast(appContext, status, extras)
+                UPGRADE_INTENT_NAME -> onUpgradeBroadcast(appContext, status, extras)
             }
         }
     }
@@ -77,8 +82,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     /**
      * Update library UI when a added package broadcast is sent by the system
      */
-    private fun onPackageAddedBroadcast(context: Context, intent: Intent) {
-        val appContext = context.applicationContext as AppInstallerApplication
+    private fun onPackageAddedBroadcast(appContext: AppInstallerApplication, intent: Intent) {
         val packageName = intent.data?.schemeSpecificPart ?: return
 
         // We ignore the broadcast if the app isn't part of our store
@@ -96,8 +100,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      * Helps us to maintain up to date library in case the user uninstalls one of our apps from the
      * system settings
      */
-    private fun onPackageRemovedBroadcast(context: Context, intent: Intent) {
-        val appContext = context.applicationContext as AppInstallerApplication
+    private fun onPackageRemovedBroadcast(appContext: AppInstallerApplication, intent: Intent) {
         val packageName = intent.data?.schemeSpecificPart ?: return
 
         // We ignore the broadcast if the app isn't part of our store
@@ -109,8 +112,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun onInstallBroadcast(context: Context, status: Int, extras: Bundle) {
-        val appContext = context.applicationContext as AppInstallerApplication
+    private fun onInstallBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         when (status) {
@@ -122,7 +124,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 // Our app is currently used by the user, so we can show the install dialog
                 if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                     confirmIntent?.flags = FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(confirmIntent)
+                    appContext.startActivity(confirmIntent)
                 }
                 // In this case, our app is paused or closed, so it's better to a show an install
                 // notification first rather than showing the install dialog which would be
@@ -130,11 +132,20 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 else {
                     if (confirmIntent != null) {
                         showInstallNotification(
-                            context = context,
+                            appContext = appContext,
                             sessionId = sessionId,
                             confirmIntent = confirmIntent
                         )
                     }
+                }
+            }
+
+            PackageInstaller.STATUS_SUCCESS -> {
+                val packageName = extras.getString(PackageInstaller.EXTRA_PACKAGE_NAME) ?: return
+
+                GlobalScope.launch {
+                    // We remove the saved session ID from our database as the installation is done
+                    removeSessionFromDB(appContext, packageName)
                 }
             }
 
@@ -148,6 +159,9 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 val packageName = extras.getString(PackageInstaller.EXTRA_PACKAGE_NAME) ?: return
 
                 GlobalScope.launch {
+                    // We remove the saved session ID from our database as the install has failed
+                    removeSessionFromDB(appContext, packageName)
+
                     // We send a sync event to update our library UI
                     appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALL_FAILURE, packageName))
                 }
@@ -162,21 +176,21 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      * Create notification for the user to trigger the install action as it requires explicit
      * interaction
      */
-    private fun showInstallNotification(context: Context, sessionId: Int, confirmIntent: Intent) {
-        val notificationRepository = NotificationRepository(context)
+    private fun showInstallNotification(appContext: AppInstallerApplication, sessionId: Int, confirmIntent: Intent) {
+        val notificationRepository = NotificationRepository(appContext)
         val sessionInfo =
-            context.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
+            appContext.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
         val existingNotifications =
             notificationRepository.getActiveNotificationsByTag(INSTALL_NOTIFICATION_TAG)
 
         createNotificationChannel(
-            context = context,
+            context = appContext,
             id = INSTALL_CHANNEL_ID,
-            name = context.getString(R.string.install_notification_channel)
+            name = appContext.getString(R.string.install_notification_channel)
         )
 
         if (existingNotifications.isNotEmpty()) {
-            val pendingIntent = NavDeepLinkBuilder(context)
+            val pendingIntent = NavDeepLinkBuilder(appContext)
                 .setGraph(R.navigation.mobile_navigation)
                 .setDestination(R.id.navigation_library)
                 .createPendingIntent()
@@ -184,14 +198,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
             notificationRepository.notify(
                 id = INSTALL_NOTIFICATION_ID,
                 tag = INSTALL_NOTIFICATION_TAG,
-                title = context.getString(R.string.multiple_install_notification_title),
-                description = context.getString(R.string.multiple_install_notification_description),
+                title = appContext.getString(R.string.multiple_install_notification_title),
+                description = appContext.getString(R.string.multiple_install_notification_description),
                 channel = INSTALL_CHANNEL_ID,
                 contentIntent = pendingIntent
             )
         } else {
             val pendingIntent = PendingIntent.getActivity(
-                context,
+                appContext,
                 1,
                 confirmIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
@@ -200,8 +214,8 @@ class AppBroadcastReceiver : BroadcastReceiver() {
             notificationRepository.notify(
                 id = INSTALL_NOTIFICATION_ID,
                 tag = INSTALL_NOTIFICATION_TAG,
-                title = context.getString(R.string.install_notification_title),
-                description = context.getString(
+                title = appContext.getString(R.string.install_notification_title),
+                description = appContext.getString(
                     R.string.install_notification_description,
                     sessionInfo.appLabel.toString()
                 ),
@@ -211,23 +225,55 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun onUninstallBroadcast(context: Context, status: Int, extras: Bundle) {
-        if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
+    private fun onUninstallBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
+        when(status) {
+            PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
 
-        val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
+                confirmIntent?.let {
+                    Log.d("UninstallReceiver", "STATUS_PENDING_USER_ACTION")
 
-        confirmIntent?.let {
-            Log.d("UninstallReceiver", "STATUS_PENDING_USER_ACTION")
-
-            // Our app is currently used by the user, so we can show the uninstall dialog
-            if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                confirmIntent.flags = FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(confirmIntent)
+                    // Our app is currently used by the user, so we can show the uninstall dialog
+                    if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                        confirmIntent.flags = FLAG_ACTIVITY_NEW_TASK
+                        appContext.startActivity(confirmIntent)
+                    }
+                }
             }
+
+            PackageInstaller.STATUS_SUCCESS -> {
+                val packageName = extras.getString(PackageInstaller.EXTRA_PACKAGE_NAME) ?: return
+
+                GlobalScope.launch {
+                    // We remove any saved session ID linked with this package name from our
+                    // database as the app has been uninstalled and the session isn't useful anymore
+                    removeSessionFromDB(appContext, packageName)
+                }
+            }
+
+            PackageInstaller.STATUS_FAILURE,
+            PackageInstaller.STATUS_FAILURE_ABORTED,
+            PackageInstaller.STATUS_FAILURE_BLOCKED,
+            PackageInstaller.STATUS_FAILURE_CONFLICT,
+            PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+            PackageInstaller.STATUS_FAILURE_INVALID,
+            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                val packageName = extras.getString(PackageInstaller.EXTRA_PACKAGE_NAME) ?: return
+
+                GlobalScope.launch {
+                    // We remove the saved session ID from our database as the uninstall has failed
+                    removeSessionFromDB(appContext, packageName)
+
+                    // We send a sync event to update our library UI
+                    appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALL_FAILURE, packageName))
+                }
+            }
+
+            else -> {}
         }
     }
 
-    private fun onUpgradeBroadcast(context: Context, status: Int, extras: Bundle) {
+    private fun onUpgradeBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
@@ -237,7 +283,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         // Our app is currently used by the user, so we can show the install dialog
         if (ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             confirmIntent?.flags = FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(confirmIntent)
+            appContext.startActivity(confirmIntent)
         }
         // In this case, our app is paused or closed, so it's better to a show an upgrade
         // notification first rather than showing the upgrade dialog which would be
@@ -245,12 +291,19 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         else {
             if (confirmIntent != null) {
                 showUpgradeNotification(
-                    context = context,
+                    context = appContext,
                     sessionId = sessionId,
                     confirmIntent = confirmIntent
                 )
             }
         }
+    }
+
+    private suspend fun removeSessionFromDB(context: Context, packageName: String) {
+        val appDB = Room.databaseBuilder(context, AppDatabase::class.java, DATABASE_NAME).build()
+
+        // We remove the saved session ID from our database as it's not needed anymore
+        appDB.sessionDao().deleteByPackageName(packageName)
     }
 
     /**
