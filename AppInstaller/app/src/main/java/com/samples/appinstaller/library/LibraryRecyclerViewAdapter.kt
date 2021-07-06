@@ -84,7 +84,7 @@ class LibraryRecyclerViewAdapter(
 
         viewHolder.appPackage = app
         viewHolder.iconImageView.setImageResource(app.icon)
-        viewHolder.appNameTextView.text = app.name
+        viewHolder.appNameTextView.text = app.label
         viewHolder.companyTextView.text = app.company
         viewHolder.statusTextView.text = if (isUpdateAvailable) {
             viewHolder.itemView.context.getString(R.string.update_available_status)
@@ -117,11 +117,11 @@ class LibraryRecyclerViewAdapter(
             viewHolder.uninstallAppButton.visibility = View.VISIBLE
         }
 
-        viewHolder.openAppButton.setOnClickListener { listeners.openApp(app.id) }
-        viewHolder.installAppButton.setOnClickListener { listeners.installApp(app.id, app.name) }
-        viewHolder.uninstallAppButton.setOnClickListener { listeners.uninstallApp(app.id) }
-        viewHolder.cancelButton.setOnClickListener { listeners.cancelInstallApp(app.id) }
-        viewHolder.upgradeAppButton.setOnClickListener { listeners.upgradeApp(app.id, app.name) }
+        viewHolder.openAppButton.setOnClickListener { listeners.openApp(app) }
+        viewHolder.installAppButton.setOnClickListener { listeners.installApp(app) }
+        viewHolder.uninstallAppButton.setOnClickListener { listeners.uninstallApp(app) }
+        viewHolder.cancelButton.setOnClickListener { listeners.cancelInstallApp(app.name) }
+        viewHolder.upgradeAppButton.setOnClickListener { listeners.upgradeApp(app) }
     }
 
     override fun getItemCount() = list.size

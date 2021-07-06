@@ -21,7 +21,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.samples.appinstaller.apps.InstallSession
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SessionDao {
@@ -31,9 +30,9 @@ interface SessionDao {
     @Delete
     fun delete(session: InstallSession)
 
-    @Query("SELECT * FROM install_sessions")
-    fun getAll(): Flow<InstallSession>
+    @Query("SELECT * FROM install_sessions WHERE packageName = :packageName LIMIT 1")
+    fun findByPackageName(packageName: String): InstallSession
 
-    @Query("SELECT * FROM install_sessions WHERE package_name = :packageName")
-    fun getByPackageName(packageName: String): Flow<InstallSession>
+    @Query("DELETE FROM install_sessions WHERE packageName = :packageName")
+    fun deleteByPackageName(packageName: String)
 }

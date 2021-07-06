@@ -22,13 +22,13 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionInfo
 import android.content.pm.PackageInstaller.SessionParams
+import android.content.pm.PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.core.os.BuildCompat
 import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
-import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,33 +41,25 @@ class AppRepository(private val context: Context) {
     private val packageInstaller: PackageInstaller
         get() = context.packageManager.packageInstaller
 
-    fun openApp(packageId: String) {
-        packageManager.getLaunchIntentForPackage(packageId)?.let {
+    fun openApp(packageName: String) {
+        packageManager.getLaunchIntentForPackage(packageName)?.let {
             ContextCompat.startActivity(context, it, null)
         }
     }
 
-    suspend fun getPackageInfo(packageId: String): PackageInfo? {
+    suspend fun isAppInstalled(packageName: String): Boolean {
         return withContext(Dispatchers.IO) {
             return@withContext try {
-                packageManager.getPackageInfo(packageId, 0)
+                packageManager.getPackageInfo(packageName, 0)
+                true
             } catch (e: PackageManager.NameNotFoundException) {
-                null
+                false
             }
         }
     }
 
-    fun uninstallApp(packageId: String) {
-        val statusIntent = Intent(UNINSTALL_INTENT_NAME).apply {
-            `package` = context.packageName
-        }
-
-        val statusPendingIntent = PendingIntent.getBroadcast(context, 0, statusIntent, 0)
-        packageInstaller.uninstall(packageId, statusPendingIntent.intentSender)
-    }
-
-    @Suppress("DEPRECATION")
     fun canRequestPackageInstalls(): Boolean {
+        @Suppress("DEPRECATION")
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             packageManager.canRequestPackageInstalls()
         } else {
@@ -104,7 +96,7 @@ class AppRepository(private val context: Context) {
             }
 
             if (BuildCompat.isAtLeastS()) {
-                params.setRequireUserAction(false)
+                params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

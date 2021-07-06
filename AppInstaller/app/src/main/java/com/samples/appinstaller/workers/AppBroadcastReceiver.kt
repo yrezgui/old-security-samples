@@ -19,6 +19,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_PACKAGE_ADDED
+import android.content.Intent.ACTION_PACKAGE_REMOVED
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageInstaller
 import android.os.Build
@@ -27,8 +29,14 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavDeepLinkBuilder
+import com.samples.appinstaller.AppInstallerApplication
 import com.samples.appinstaller.NotificationRepository
 import com.samples.appinstaller.R
+import com.samples.appinstaller.SyncEvent
+import com.samples.appinstaller.SyncEventType
+import com.samples.appinstaller.apps.SampleStoreDB
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 const val INSTALL_INTENT_NAME = "appinstaller_install_status"
 const val INSTALL_CHANNEL_ID = "install"
@@ -57,15 +65,52 @@ class AppBroadcastReceiver : BroadcastReceiver() {
 
         context?.let {
             when (action) {
-                INSTALL_INTENT_NAME -> handleInstallBroadcast(context, status, extras)
-                UNINSTALL_INTENT_NAME -> handleUninstallBroadcast(context, status, extras)
-                UPGRADE_INTENT_NAME -> handleUpgradeBroadcast(context, status, extras)
+                ACTION_PACKAGE_ADDED -> onPackageAddedBroadcast(context, intent)
+                ACTION_PACKAGE_REMOVED -> onPackageRemovedBroadcast(context, intent)
+                INSTALL_INTENT_NAME -> onInstallBroadcast(context, status, extras)
+                UNINSTALL_INTENT_NAME -> onUninstallBroadcast(context, status, extras)
+                UPGRADE_INTENT_NAME -> onUpgradeBroadcast(context, status, extras)
             }
         }
     }
 
-    private fun handleInstallBroadcast(context: Context, status: Int, extras: Bundle) {
+    /**
+     * Update library UI when a added package broadcast is sent by the system
+     */
+    private fun onPackageAddedBroadcast(context: Context, intent: Intent) {
+        val appContext = context.applicationContext as AppInstallerApplication
+        val packageName = intent.data?.schemeSpecificPart ?: return
 
+        // We ignore the broadcast if the app isn't part of our store
+        SampleStoreDB[packageName] ?: return
+
+        GlobalScope.launch {
+            // We send a sync event to update our library UI
+            appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALL_SUCCESS, packageName))
+        }
+    }
+
+    /**
+     * Update library UI when a removed package broadcast is sent by the system
+     *
+     * Helps us to maintain up to date library in case the user uninstalls one of our apps from the
+     * system settings
+     */
+    private fun onPackageRemovedBroadcast(context: Context, intent: Intent) {
+        val appContext = context.applicationContext as AppInstallerApplication
+        val packageName = intent.data?.schemeSpecificPart ?: return
+
+        // We ignore the broadcast if the app isn't part of our store
+        SampleStoreDB[packageName] ?: return
+
+        GlobalScope.launch {
+            // We send a sync event to update our library UI
+            appContext.emitSyncEvent(SyncEvent(SyncEventType.UNINSTALL_SUCCESS, packageName))
+        }
+    }
+
+    private fun onInstallBroadcast(context: Context, status: Int, extras: Bundle) {
+        val appContext = context.applicationContext as AppInstallerApplication
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         when (status) {
@@ -92,6 +137,22 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                     }
                 }
             }
+
+            PackageInstaller.STATUS_FAILURE,
+            PackageInstaller.STATUS_FAILURE_ABORTED,
+            PackageInstaller.STATUS_FAILURE_BLOCKED,
+            PackageInstaller.STATUS_FAILURE_CONFLICT,
+            PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+            PackageInstaller.STATUS_FAILURE_INVALID,
+            PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                val packageName = extras.getString(PackageInstaller.EXTRA_PACKAGE_NAME) ?: return
+
+                GlobalScope.launch {
+                    // We send a sync event to update our library UI
+                    appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALL_FAILURE, packageName))
+                }
+            }
+
             else -> {
             }
         }
@@ -108,7 +169,11 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         val existingNotifications =
             notificationRepository.getActiveNotificationsByTag(INSTALL_NOTIFICATION_TAG)
 
-        createInstallNotificationChannel(context)
+        createNotificationChannel(
+            context = context,
+            id = INSTALL_CHANNEL_ID,
+            name = context.getString(R.string.install_notification_channel)
+        )
 
         if (existingNotifications.isNotEmpty()) {
             val pendingIntent = NavDeepLinkBuilder(context)
@@ -146,24 +211,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Create channel for installation notifications
-     */
-    private fun createInstallNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = NotificationRepository(context)
-            val name = context.getString(R.string.install_notification_channel)
-
-            notificationManager.createChannel(
-                id = INSTALL_CHANNEL_ID,
-                name = name,
-                description = ""
-            )
-        }
-    }
-
-    private fun handleUninstallBroadcast(context: Context, status: Int, extras: Bundle) {
-
+    private fun onUninstallBroadcast(context: Context, status: Int, extras: Bundle) {
         if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
 
         val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
@@ -179,7 +227,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun handleUpgradeBroadcast(context: Context, status: Int, extras: Bundle) {
+    private fun onUpgradeBroadcast(context: Context, status: Int, extras: Bundle) {
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return
@@ -210,7 +258,11 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      * interaction
      */
     private fun showUpgradeNotification(context: Context, sessionId: Int, confirmIntent: Intent) {
-        createUpgradeNotificationChannel(context)
+        createNotificationChannel(
+            context = context,
+            id = UPGRADE_CHANNEL_ID,
+            name = context.getString(R.string.upgrade_notification_channel)
+        )
 
         val notificationRepository = NotificationRepository(context)
         val sessionInfo =
@@ -255,15 +307,14 @@ class AppBroadcastReceiver : BroadcastReceiver() {
     }
 
     /**
-     * Create channel for upgrade notifications
+     * Create a notification channel
      */
-    private fun createUpgradeNotificationChannel(context: Context) {
+    private fun createNotificationChannel(context: Context, id: String, name: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = NotificationRepository(context)
-            val name = context.getString(R.string.upgrade_notification_channel)
 
             notificationManager.createChannel(
-                id = UPGRADE_CHANNEL_ID,
+                id = id,
                 name = name,
                 description = ""
             )

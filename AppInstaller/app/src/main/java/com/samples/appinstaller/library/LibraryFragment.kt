@@ -35,6 +35,7 @@ import com.samples.appinstaller.AppSettings
 import com.samples.appinstaller.AppViewModel
 import com.samples.appinstaller.BuildConfig
 import com.samples.appinstaller.R
+import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -87,10 +88,8 @@ class LibraryFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_refresh -> {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.loadLibrary()
-                    adapter.updateTimestamp(System.currentTimeMillis())
-                }
+                viewModel.loadLibrary()
+                adapter.updateTimestamp(System.currentTimeMillis())
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -106,12 +105,12 @@ class LibraryFragment : Fragment() {
             updateAvailabilityPeriod = viewModel.appSettings.value?.updateAvailabilityPeriod
                 ?: AppSettings.getDefaultInstance().updateAvailabilityPeriod,
             listeners = object : LibraryEntryActionListeners {
-                override fun openApp(appId: String) {
-                    viewModel.openApp(appId)
+                override fun openApp(app: AppPackage) {
+                    viewModel.openApp(app)
                 }
 
-                override fun installApp(appId: String, appName: String) {
-                    viewModel.installApp(appId, appName)
+                override fun installApp(app: AppPackage) {
+                    viewModel.installApp(app)
                 }
 
                 override fun cancelInstallApp(appId: String) {
@@ -122,12 +121,12 @@ class LibraryFragment : Fragment() {
                     ).show()
                 }
 
-                override fun upgradeApp(appId: String, appName: String) {
-                    viewModel.upgradeApp(appId, appName)
+                override fun upgradeApp(app: AppPackage) {
+                    viewModel.upgradeApp(app)
                 }
 
-                override fun uninstallApp(appId: String) {
-                    viewModel.uninstallApp(appId)
+                override fun uninstallApp(app: AppPackage) {
+                    viewModel.uninstallApp(app)
                 }
             }
         )
@@ -181,14 +180,14 @@ class LibraryFragment : Fragment() {
             data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
         }
 
-        startActivityForResult(intent, 1000)
+        startActivity(intent)
     }
 }
 
 interface LibraryEntryActionListeners {
-    fun openApp(appId: String)
-    fun installApp(appId: String, appName: String)
+    fun openApp(app: AppPackage)
+    fun installApp(app: AppPackage)
     fun cancelInstallApp(appId: String)
-    fun upgradeApp(appId: String, appName: String)
-    fun uninstallApp(appId: String)
+    fun upgradeApp(app: AppPackage)
+    fun uninstallApp(app: AppPackage)
 }

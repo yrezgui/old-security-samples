@@ -19,6 +19,9 @@
     <string name="update_available_status">&#9679; Update available</string>
     <string name="feature_not_implemented">Feature not implemented yet</string>
 
+    <string name="installing_notification_title">Installing %s</string>
+    <string name="installing_notification_cancel_label">Cancel</string>
+
     <string name="autoupdate_settings_description">DemoStore will update (or not) automatically apps it has installed based on these settings</string>
     <string name="auto_update_title">Auto-update Settings</string>
 
