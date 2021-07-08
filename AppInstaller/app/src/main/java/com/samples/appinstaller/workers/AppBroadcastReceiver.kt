@@ -112,7 +112,11 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun onInstallBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
+    private fun onInstallBroadcast(
+        appContext: AppInstallerApplication,
+        status: Int,
+        extras: Bundle
+    ) {
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         when (status) {
@@ -176,7 +180,11 @@ class AppBroadcastReceiver : BroadcastReceiver() {
      * Create notification for the user to trigger the install action as it requires explicit
      * interaction
      */
-    private fun showInstallNotification(appContext: AppInstallerApplication, sessionId: Int, confirmIntent: Intent) {
+    private fun showInstallNotification(
+        appContext: AppInstallerApplication,
+        sessionId: Int,
+        confirmIntent: Intent
+    ) {
         val notificationRepository = NotificationRepository(appContext)
         val sessionInfo =
             appContext.packageManager.packageInstaller.getSessionInfo(sessionId) ?: return
@@ -186,7 +194,7 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         createNotificationChannel(
             context = appContext,
             id = INSTALL_CHANNEL_ID,
-            name = appContext.getString(R.string.install_notification_channel)
+            name = appContext.getString(R.string.alert_notification_channel)
         )
 
         if (existingNotifications.isNotEmpty()) {
@@ -225,8 +233,12 @@ class AppBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun onUninstallBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
-        when(status) {
+    private fun onUninstallBroadcast(
+        appContext: AppInstallerApplication,
+        status: Int,
+        extras: Bundle
+    ) {
+        when (status) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                 val confirmIntent = extras[Intent.EXTRA_INTENT] as Intent?
 
@@ -269,11 +281,16 @@ class AppBroadcastReceiver : BroadcastReceiver() {
                 }
             }
 
-            else -> {}
+            else -> {
+            }
         }
     }
 
-    private fun onUpgradeBroadcast(appContext: AppInstallerApplication, status: Int, extras: Bundle) {
+    private fun onUpgradeBroadcast(
+        appContext: AppInstallerApplication,
+        status: Int,
+        extras: Bundle
+    ) {
         val sessionId = extras.getInt(PackageInstaller.EXTRA_SESSION_ID)
 
         if (status != PackageInstaller.STATUS_PENDING_USER_ACTION) return

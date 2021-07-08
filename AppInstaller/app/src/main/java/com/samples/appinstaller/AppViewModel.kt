@@ -40,9 +40,9 @@ import com.samples.appinstaller.apps.SampleStoreDB
 import com.samples.appinstaller.settings.appSettings
 import com.samples.appinstaller.settings.toDuration
 import com.samples.appinstaller.workers.InstallWorker
-import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_ID
-import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_LABEL
-import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_NAME
+import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_ID_KEY
+import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_LABEL_KEY
+import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_NAME_KEY
 import com.samples.appinstaller.workers.PackageInstallerUtils
 import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_WORKER_TAG
@@ -133,24 +133,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Open an app by its id.
-     */
-    fun openApp(appId: String) {
-        appRepository.openApp(appId)
-    }
-
-    /**
-     * Uninstall an app by its id.
-     */
-    fun uninstallApp(packageName: String) {
-        viewModelScope.launch {
-            if (appRepository.isAppInstalled(packageName)) {
-                PackageInstallerUtils.uninstallApp(appContext, packageName)
-            }
-        }
-    }
-
-    /**
      * Uninstall an app by its id.
      */
     fun uninstallApp(appPackage: AppPackage) {
@@ -168,9 +150,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val installWorkRequest = OneTimeWorkRequestBuilder<InstallWorker>()
             .setInputData(
                 workDataOf(
-                    PACKAGE_ID to app.id,
-                    PACKAGE_NAME to app.name,
-                    PACKAGE_LABEL to app.label
+                    PACKAGE_ID_KEY to app.id,
+                    PACKAGE_NAME_KEY to app.name,
+                    PACKAGE_LABEL_KEY to app.label
                 )
             )
             .build()

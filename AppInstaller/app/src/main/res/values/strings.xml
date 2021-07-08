@@ -7,7 +7,7 @@
     <string name="request_permission_label">Request Permission</string>
     <string name="authorization_dialog_title">Authorization</string>
     <string name="authorization_dialog_description">App Installer needs this special permission to be install other apps</string>
-    <string name="authorization_dialog_confirm_label">Ok</string>
+    <string name="authorization_dialog_confirm_label">OK</string>
     <string name="authorization_dialog_learn_more_label">Learn More</string>
 
     <string name="refresh_action_label">Refresh</string>
@@ -37,7 +37,7 @@
     <string name="update_availability_seconds_period">After %d seconds</string>
     <string name="update_availability_minutes_period">After %d minutes</string>
 
-    <string name="install_notification_channel">Install app</string>
+    <string name="alert_notification_channel">Alerts</string>
     <string name="install_notification_title">Install app</string>
     <string name="install_notification_description">Click here to install the app %s</string>
     <string name="multiple_install_notification_title">Install apps</string>

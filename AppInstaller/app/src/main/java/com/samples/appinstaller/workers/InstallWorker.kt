@@ -15,18 +15,15 @@
  */
 package com.samples.appinstaller.workers
 
-import android.app.NotificationChannel
-import android.app.NotificationManager.IMPORTANCE_LOW
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.samples.appinstaller.AppDatabase
 import com.samples.appinstaller.AppInstallerApplication
 import com.samples.appinstaller.DATABASE_NAME
@@ -43,23 +40,30 @@ class InstallWorker(appContext: Context, workerParams: WorkerParameters) :
 
     companion object {
         const val WORKER_TAG = "install"
-        const val PACKAGE_ID = "package_id"
-        const val PACKAGE_NAME = "package_name"
-        const val PACKAGE_LABEL = "package_label"
+        const val PACKAGE_ID_KEY = "package_id"
+        const val PACKAGE_NAME_KEY = "package_name"
+        const val PACKAGE_LABEL_KEY = "package_label"
+        const val SESSION_ID_KEY = "session_id"
+        const val CREATED_AT_KEY = "created_at"
     }
 
-    override suspend fun doWork(): Result = coroutineScope {
-        val appContext = applicationContext as AppInstallerApplication
+    private lateinit var appContext: AppInstallerApplication
+    private lateinit var appDB: AppDatabase
+    private lateinit var packageName: String
+    private lateinit var packageLabel: String
 
-        val packageId = inputData.getInt(PACKAGE_ID, -1)
+    override suspend fun doWork(): Result = coroutineScope {
+        appContext = applicationContext as AppInstallerApplication
+
+        val packageId = inputData.getInt(PACKAGE_ID_KEY, -1)
         if (packageId == -1) {
             return@coroutineScope Result.failure()
         }
 
-        val packageName =
-            inputData.getString(PACKAGE_NAME) ?: return@coroutineScope Result.failure()
-        val packageLabel =
-            inputData.getString(PACKAGE_LABEL) ?: return@coroutineScope Result.failure()
+        packageName =
+            inputData.getString(PACKAGE_NAME_KEY) ?: return@coroutineScope Result.failure()
+        packageLabel =
+            inputData.getString(PACKAGE_LABEL_KEY) ?: return@coroutineScope Result.failure()
 
         // Verify the package name exists in our app database
         if (!SampleStoreDB.containsKey(packageName)) {
@@ -71,7 +75,72 @@ class InstallWorker(appContext: Context, workerParams: WorkerParameters) :
 
         // Set worker as a foreground service
         setForeground(createForegroundInfo(packageId, packageLabel))
-        val appDB = Room.databaseBuilder(appContext, AppDatabase::class.java, DATABASE_NAME).build()
+
+        // Initialize database client
+        appDB = Room.databaseBuilder(appContext, AppDatabase::class.java, DATABASE_NAME).build()
+
+        // Create install session and write APK to it if there's not an existing one
+        val installSession = createAndWriteInstallSession()
+
+        try {
+            // Commit session (throws an exception if session doesn't exist)
+            PackageInstallerUtils.commitSession(
+                context = appContext,
+                sessionId = installSession.sessionId,
+                intent = Intent(INSTALL_INTENT_NAME).apply {
+                    setPackage(appContext.packageName)
+                }
+            )
+
+            return@coroutineScope Result.success(
+                workDataOf(
+                    PACKAGE_NAME_KEY to installSession.packageName,
+                    SESSION_ID_KEY to installSession.sessionId,
+                    CREATED_AT_KEY to installSession.createdAt
+                )
+            )
+        } catch (e: Exception) {
+            appDB.sessionDao().deleteBySessionId(installSession.sessionId)
+            return@coroutineScope Result.failure()
+        }
+    }
+
+    /**
+     * Creates an instance of ForegroundInfo which can be used to update the ongoing notification.
+     */
+    private fun createForegroundInfo(notificationId: Int, packageLabel: String): ForegroundInfo {
+        val id = WORKER_TAG
+        val title = appContext.getString(R.string.installing_notification_title, packageLabel)
+        val cancel = appContext.getString(R.string.installing_notification_cancel_label)
+
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(appContext).createCancelPendingIntent(getId())
+
+        // Create a Notification channel
+        WorkerUtils.createNotificationChannel(appContext)
+
+        val notification = NotificationCompat.Builder(appContext, id)
+            .setContentTitle(title)
+            .setTicker(title)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(true)
+            // Add the cancel action to the notification which can
+            // be used to cancel the worker
+            .addAction(android.R.drawable.ic_delete, cancel, intent)
+            .build()
+
+        return ForegroundInfo(notificationId, notification)
+    }
+
+    /**
+     * Create install session and write APK to it if there's not an existing one
+     */
+    private suspend fun createAndWriteInstallSession(): InstallSession {
+        appDB.sessionDao().findByPackageName(packageName)?.let { existingSession ->
+            if (!existingSession.isExpired) {
+                return existingSession
+            }
+        }
 
         // We fake a delay to show active work. This would be replaced by real APK download
         delay(3000L)
@@ -89,51 +158,9 @@ class InstallWorker(appContext: Context, workerParams: WorkerParameters) :
             apkInputStream = appContext.assets.open("$packageName.apk")
         )
 
-        appDB.sessionDao().insert(InstallSession(packageName, sessionId))
+        val installSession = InstallSession(packageName, sessionId)
+        appDB.sessionDao().insert(installSession)
 
-        PackageInstallerUtils.commitSession(
-            context = appContext,
-            sessionId = sessionId,
-            intent = Intent(INSTALL_INTENT_NAME).apply {
-                setPackage(appContext.packageName)
-            }
-        )
-
-        Result.success()
-    }
-
-    /**
-     * Creates an instance of ForegroundInfo which can be used to update the ongoing notification.
-     */
-    private fun createForegroundInfo(notificationId: Int, packageLabel: String): ForegroundInfo {
-        val id = WORKER_TAG
-        val title =
-            applicationContext.getString(R.string.installing_notification_title, packageLabel)
-        val cancel = applicationContext.getString(R.string.installing_notification_cancel_label)
-
-        // This PendingIntent can be used to cancel the worker
-        val intent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(getId())
-
-        // Create a Notification channel if necessary
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = applicationContext.getString(R.string.install_notification_channel)
-            val channel = NotificationChannel(id, channelName, IMPORTANCE_LOW).apply {
-                this.description = "description"
-            }
-
-            NotificationManagerCompat.from(applicationContext).createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(applicationContext, id)
-            .setContentTitle(title)
-            .setTicker(title)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setOngoing(true)
-            // Add the cancel action to the notification which can
-            // be used to cancel the worker
-            .addAction(android.R.drawable.ic_delete, cancel, intent)
-            .build()
-
-        return ForegroundInfo(notificationId, notification)
+        return installSession
     }
 }

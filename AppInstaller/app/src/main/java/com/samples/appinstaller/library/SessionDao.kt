@@ -30,9 +30,18 @@ interface SessionDao {
     @Delete
     suspend fun delete(session: InstallSession)
 
-    @Query("SELECT * FROM install_sessions WHERE packageName = :packageName LIMIT 1")
-    suspend fun findByPackageName(packageName: String): InstallSession
+    @Query("SELECT * FROM install_sessions WHERE package_name = :packageName LIMIT 1")
+    suspend fun findByPackageName(packageName: String): InstallSession?
 
-    @Query("DELETE FROM install_sessions WHERE packageName = :packageName")
+    @Query("SELECT * FROM install_sessions WHERE session_id = :sessionId LIMIT 1")
+    suspend fun findBySessionId(sessionId: Int): InstallSession?
+
+    @Query("DELETE FROM install_sessions WHERE package_name = :packageName")
     suspend fun deleteByPackageName(packageName: String)
+
+    @Query("DELETE FROM install_sessions WHERE session_id = :sessionId")
+    suspend fun deleteBySessionId(sessionId: Int)
+
+    @Query("DELETE FROM install_sessions")
+    suspend fun deleteAllSessions()
 }
