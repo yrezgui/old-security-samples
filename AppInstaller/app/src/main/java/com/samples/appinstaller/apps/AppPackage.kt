@@ -19,6 +19,7 @@ import androidx.annotation.DrawableRes
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.Duration
 
 data class AppPackage(
     val id: Int,
@@ -34,11 +35,16 @@ enum class AppStatus {
     UNINSTALLED, INSTALLED, INSTALLING, UPGRADING
 }
 
-@Entity(
-    tableName = "install_sessions"
-)
+@Entity(tableName = "install_sessions")
 data class InstallSession(
-    @PrimaryKey val packageName: String,
+    @PrimaryKey @ColumnInfo(name = "package_name") val packageName: String,
     @ColumnInfo(name = "session_id") val sessionId: Int,
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
-)
+) {
+    companion object {
+        val EXPIRE_TIME = Duration.ofDays(1).toMillis()
+    }
+
+    val isExpired: Boolean
+        get() = (createdAt + EXPIRE_TIME) < System.currentTimeMillis()
+}
