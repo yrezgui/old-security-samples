@@ -26,12 +26,12 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.samples.appinstaller.AppDatabase
 import com.samples.appinstaller.AppInstallerApplication
-import com.samples.appinstaller.DATABASE_NAME
 import com.samples.appinstaller.R
 import com.samples.appinstaller.SyncEvent
 import com.samples.appinstaller.SyncEventType
 import com.samples.appinstaller.apps.InstallSession
 import com.samples.appinstaller.apps.SampleStoreDB
+import com.samples.appinstaller.library.DATABASE_NAME
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 

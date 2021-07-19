@@ -164,4 +164,10 @@ class AppRepository(private val context: Context) {
                 .toMap()
         }
     }
+
+    suspend fun getInstalledPackages(): List<PackageInfo> {
+        return withContext(Dispatchers.IO) {
+            return@withContext packageManager.getInstalledPackages(0)
+        }
+    }
 }

@@ -37,7 +37,6 @@ import com.samples.appinstaller.BuildConfig
 import com.samples.appinstaller.R
 import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.databinding.FragmentLibraryBinding
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 const val LEARN_MORE_LINK =
@@ -68,9 +67,6 @@ class LibraryFragment : Fragment() {
         super.onResume()
         togglePermissionSection()
         viewLifecycleOwner.lifecycleScope.launch {
-            // TODO: Remove this delay once we sync active install sessions
-            // FIXME: Remove automatic sync
-            delay(500L)
             viewModel.loadLibrary()
         }
     }
@@ -122,7 +118,7 @@ class LibraryFragment : Fragment() {
                 }
 
                 override fun upgradeApp(app: AppPackage) {
-                    viewModel.upgradeApp(app)
+                    viewModel.installApp(app)
                 }
 
                 override fun uninstallApp(app: AppPackage) {

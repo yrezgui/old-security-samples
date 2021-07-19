@@ -16,17 +16,13 @@
 package com.samples.appinstaller
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageInstaller
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -37,6 +33,7 @@ import com.samples.appinstaller.apps.AppPackage
 import com.samples.appinstaller.apps.AppRepository
 import com.samples.appinstaller.apps.AppStatus
 import com.samples.appinstaller.apps.SampleStoreDB
+import com.samples.appinstaller.library.DATABASE_NAME
 import com.samples.appinstaller.settings.appSettings
 import com.samples.appinstaller.settings.toDuration
 import com.samples.appinstaller.workers.InstallWorker
@@ -44,18 +41,13 @@ import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_ID_KEY
 import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_LABEL_KEY
 import com.samples.appinstaller.workers.InstallWorker.Companion.PACKAGE_NAME_KEY
 import com.samples.appinstaller.workers.PackageInstallerUtils
-import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 import com.samples.appinstaller.workers.UPGRADE_WORKER_TAG
 import com.samples.appinstaller.workers.UpgradeWorker
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 typealias LibraryEntries = Map<String, AppPackage>
-
-const val DOWNLOADING_DELAY = 3000L
-const val DATABASE_NAME = "app-database"
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext: AppInstallerApplication
@@ -67,6 +59,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         get() = appRepository.canRequestPackageInstalls()
 
     val appSettings: LiveData<AppSettings> = appContext.appSettings.data.asLiveData()
+
+    val appDB = Room.databaseBuilder(appContext, AppDatabase::class.java, DATABASE_NAME).build()
 
     private val _library = MutableLiveData<LibraryEntries>(emptyMap())
     val library: LiveData<LibraryEntries> = _library
@@ -86,16 +80,28 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadLibrary() {
         viewModelScope.launch {
-            val updatedLibrary = appRepository.getInstalledPackageMap()
-                .filterKeys { SampleStoreDB.containsKey(it) }
-                .mapValues {
-                    SampleStoreDB[it.key]!!.copy(
+            val updatedLibrary = appRepository.getInstalledPackages()
+                .mapNotNull {
+                    SampleStoreDB[it.packageName]?.copy(
                         status = AppStatus.INSTALLED,
-                        updatedAt = it.value.lastUpdateTime
+                        updatedAt = it.lastUpdateTime
                     )
                 }
+                .map { it.name to it }
+                .toMap()
 
-            _library.value = SampleStoreDB + updatedLibrary
+            val ongoingInstallSessions = appDB.sessionDao()
+                .getAll()
+                .filter { !it.isExpired }
+                .mapNotNull {
+                    SampleStoreDB[it.packageName]?.copy(
+                        status = AppStatus.INSTALLING
+                    )
+                }
+                .map { it.name to it }
+                .toMap()
+
+            _library.value = SampleStoreDB + updatedLibrary + ongoingInstallSessions
         }
     }
 
@@ -166,31 +172,31 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      *
      * TODO: This method should be a WorkManager worker running in the foreground
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun upgradeApp(app: AppPackage) {
-        viewModelScope.launch {
-            val sessionInfo = appRepository.getCurrentInstallSession(app.name)
-                ?: appRepository.getSessionInfo(
-                    appRepository.createInstallSession(
-                        app.label,
-                        app.name
-                    )
-                )
-                ?: return@launch
-
-            // We're updating the library entry to show a progress bar
-            appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALLING, app.name))
-
-            // We fake a delay to show active work. This would be replaced by real APK download
-            delay(DOWNLOADING_DELAY)
-
-            appRepository.writeAndCommitSession(
-                sessionId = sessionInfo.sessionId,
-                apkInputStream = appContext.assets.open("${app.name}.apk"),
-                isUpgrade = true
-            )
-        }
-    }
+//    @Suppress("BlockingMethodInNonBlockingContext")
+//    fun upgradeApp(app: AppPackage) {
+//        viewModelScope.launch {
+//            val sessionInfo = appRepository.getCurrentInstallSession(app.name)
+//                ?: appRepository.getSessionInfo(
+//                    appRepository.createInstallSession(
+//                        app.label,
+//                        app.name
+//                    )
+//                )
+//                ?: return@launch
+//
+//            // We're updating the library entry to show a progress bar
+//            appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALLING, app.name))
+//
+//            // We fake a delay to show active work. This would be replaced by real APK download
+//            delay(DOWNLOADING_DELAY)
+//
+//            appRepository.writeAndCommitSession(
+//                sessionId = sessionInfo.sessionId,
+//                apkInputStream = appContext.assets.open("${app.name}.apk"),
+//                isUpgrade = true
+//            )
+//        }
+//    }
 
     /**
      * Setter for the [AutoUpdateSchedule] setting
@@ -234,48 +240,5 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun triggerAutoUpdating(@Suppress("UNUSED_PARAMETER") view: View) {
         val upgradeWorkRequest = OneTimeWorkRequestBuilder<UpgradeWorker>().build()
         WorkManager.getInstance(appContext).enqueue(upgradeWorkRequest)
-    }
-
-    /**
-     * Monitor install sessions progress
-     */
-    val packageInstallCallback = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val action = intent.action
-
-            Log.d("packageInstallCallback", "action: $action")
-
-            viewModelScope.launch {
-                when (action) {
-                    // Broadcast triggered by our app
-                    UPGRADE_INTENT_NAME -> {
-                        val status =
-                            intent.extras?.getInt(PackageInstaller.EXTRA_STATUS) ?: return@launch
-                        val packageName =
-                            intent.extras?.getString(PackageInstaller.EXTRA_PACKAGE_NAME)
-                                ?: intent.data?.schemeSpecificPart
-                                ?: return@launch
-                        onInternalBroadcast(status, packageName)
-                    }
-                }
-            }
-        }
-
-        private suspend fun onInternalBroadcast(status: Int, packageName: String) {
-            when (status) {
-                // We monitor user cancellation or system failure of these actions within our app
-                PackageInstaller.STATUS_FAILURE,
-                PackageInstaller.STATUS_FAILURE_ABORTED,
-                PackageInstaller.STATUS_FAILURE_BLOCKED,
-                PackageInstaller.STATUS_FAILURE_CONFLICT,
-                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
-                PackageInstaller.STATUS_FAILURE_INVALID,
-                PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    appContext.emitSyncEvent(SyncEvent(SyncEventType.INSTALL_FAILURE, packageName))
-                }
-                else -> {
-                }
-            }
-        }
     }
 }

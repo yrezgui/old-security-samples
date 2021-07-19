@@ -15,13 +15,7 @@
  */
 package com.samples.appinstaller
 
-import android.content.Intent.ACTION_PACKAGE_ADDED
-import android.content.Intent.ACTION_PACKAGE_REMOVED
-import android.content.IntentFilter
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -30,15 +24,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.samples.appinstaller.databinding.ActivityMainBinding
-import com.samples.appinstaller.workers.INSTALL_INTENT_NAME
-import com.samples.appinstaller.workers.UNINSTALL_INTENT_NAME
-import com.samples.appinstaller.workers.UPGRADE_INTENT_NAME
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private val appViewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,39 +53,5 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp(appBarConfiguration) ||
             super.onSupportNavigateUp()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val handler = Handler(Looper.getMainLooper())
-
-        registerReceiver(
-            appViewModel.packageInstallCallback,
-            IntentFilter().apply {
-                addAction(INSTALL_INTENT_NAME)
-                addAction(UNINSTALL_INTENT_NAME)
-                addAction(UPGRADE_INTENT_NAME)
-            },
-            null,
-            handler
-        )
-
-        // We have to register the observer twice as parameters are different between these two
-        // groups of intents
-        registerReceiver(
-            appViewModel.packageInstallCallback,
-            IntentFilter().apply {
-                addAction(ACTION_PACKAGE_ADDED)
-                addAction(ACTION_PACKAGE_REMOVED)
-                addDataScheme("package")
-            },
-            null,
-            handler
-        )
-    }
-
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(appViewModel.packageInstallCallback)
     }
 }

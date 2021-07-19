@@ -22,6 +22,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.samples.appinstaller.apps.InstallSession
 
+const val DATABASE_NAME = "app-database"
+
 @Dao
 interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -29,6 +31,9 @@ interface SessionDao {
 
     @Delete
     suspend fun delete(session: InstallSession)
+
+    @Query("SELECT * FROM install_sessions")
+    suspend fun getAll(): List<InstallSession>
 
     @Query("SELECT * FROM install_sessions WHERE package_name = :packageName LIMIT 1")
     suspend fun findByPackageName(packageName: String): InstallSession?
